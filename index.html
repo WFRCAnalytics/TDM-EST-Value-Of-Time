@@ -8,7 +8,7 @@
 
 <meta name="author" content="Pukar Bhandari">
 <meta name="dcterms.date" content="2025-10-14">
-<meta name="description" content="This notebook replicates the analysis from the ’_archive/_Source - Med Income &amp; Value of Time - 2022-08-09.xlsb’ using the WFRC PUMA. The values of time are segmented by occupancy and purpose (work vs.&nbsp;non-work).">
+<meta name="description" content="This notebook replicates the analysis from the ’_archive/_Source - Med Income &amp; Value of Time - 2022-08-09.xlsb’ using the Utah Household Data. The values of time are segmented by occupancy and purpose (work vs.&nbsp;personal).">
 
 <title>Value of Time Estimation</title>
 <style>
@@ -264,7 +264,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
             <p class="subtitle lead">Estimating the Value of Time Parameter for Utah’s Travel Demand Model</p>
                   <div>
         <div class="description">
-          This notebook replicates the analysis from the ’_archive/_Source - Med Income &amp; Value of Time - 2022-08-09.xlsb’ using the WFRC PUMA. The values of time are segmented by occupancy and purpose (work vs.&nbsp;non-work).
+          This notebook replicates the analysis from the ’_archive/_Source - Med Income &amp; Value of Time - 2022-08-09.xlsb’ using the Utah Household Data. The values of time are segmented by occupancy and purpose (work vs.&nbsp;personal).
         </div>
       </div>
                 </div>
@@ -361,7 +361,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="load-libraries" class="level3">
 <h3 class="anchored" data-anchor-id="load-libraries">Load Libraries</h3>
 <p>Import all required libraries for the analysis. The pygris library enables direct access to Census Bureau geographic data and ACS estimates through their API.</p>
-<div id="ff45da64" class="cell" data-execution_count="1">
+<div id="666d0cd7" class="cell" data-execution_count="1">
 <details class="code-fold">
 <summary>Show the code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># For Analysis</span></span>
@@ -391,7 +391,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> dotenv <span class="im">import</span> load_dotenv</span>
 <span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a>load_dotenv()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
-<div class="cell-output cell-output-display" data-execution_count="1">
+<div class="cell-output cell-output-display" data-execution_count="17">
 <pre><code>False</code></pre>
 </div>
 </div>
@@ -399,7 +399,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="environment-variables" class="level3">
 <h3 class="anchored" data-anchor-id="environment-variables">Environment Variables</h3>
 <p>Set the coordinate reference system for the analysis to NAD83 / UTM zone 12N (EPSG:3566), which is appropriate for Utah. Also validate the state FIPS code for Utah.</p>
-<div id="8ff2f96b" class="cell" data-execution_count="2">
+<div id="de345d2e" class="cell" data-execution_count="2">
 <details class="code-fold">
 <summary>Show the code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>PROJECT_CRS <span class="op">=</span> <span class="st">"EPSG:3566"</span>  <span class="co"># NAD83 / UTM zone 12N</span></span>
@@ -423,7 +423,7 @@ Tip
 <p>Create a <code>.env</code> file in the project directory and add your Census API key: <code>CENSUS_API_KEY=your-key-here</code> This enables fetching US Census data from the Census API.</p>
 </div>
 </div>
-<div id="3ff1b363" class="cell" data-execution_count="3">
+<div id="20c4068d" class="cell" data-execution_count="3">
 <details class="code-fold">
 <summary>Show the code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Set your API key into environment (alternative to .env file)</span></span>
@@ -436,7 +436,7 @@ Tip
 <h2 data-number="3" class="anchored" data-anchor-id="define-helper-functions"><span class="header-section-number">3</span> Define Helper Functions</h2>
 <section id="fetch-excel-files-from-bls-or-bts" class="level3">
 <h3 class="anchored" data-anchor-id="fetch-excel-files-from-bls-or-bts">Fetch Excel Files from BLS or BTS</h3>
-<div id="98c9ff7b" class="cell" data-execution_count="4">
+<div id="a4c7e92a" class="cell" data-execution_count="4">
 <details class="code-fold">
 <summary>Show the code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> fetch_excel(path, url):</span>
@@ -472,7 +472,7 @@ Tip
 <section id="income-category-lookup" class="level3">
 <h3 class="anchored" data-anchor-id="income-category-lookup">Income Category Lookup</h3>
 <p>Create a reference table defining the income brackets used in ACS Table B19001. Each bracket has a lower and upper limit, and we calculate midpoints for median estimation. The highest bracket ($200,000+) uses $300,000 as a reasonable midpoint based on income distribution patterns.</p>
-<div id="82881496" class="cell" data-execution_count="5">
+<div id="5d1302fc" class="cell" data-execution_count="5">
 <details class="code-fold">
 <summary>Show the code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>lookup_hhinc <span class="op">=</span> pd.DataFrame({</span>
@@ -503,7 +503,7 @@ Tip
 <span id="cb8-26"><a href="#cb8-26" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb8-27"><a href="#cb8-27" aria-hidden="true" tabindex="-1"></a>lookup_hhinc</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
-<div class="cell-output cell-output-display" data-execution_count="4">
+<div class="cell-output cell-output-display" data-execution_count="20">
 <div>
 
 
@@ -645,7 +645,7 @@ Tip
 <p>The Consumer Price Index (CPI-U-RS) from the Bureau of Labor Statistics provides inflation adjustment factors. This will be useful for comparing income values across different time periods or adjusting historical data to current dollars. The research series (R-CPI-U-RS) is particularly appropriate for longitudinal analysis as it uses consistent methodology throughout the time series.</p>
 <p>Download and load the CPI data directly from the BLS website. The data includes annual average CPI values that can be used to adjust income figures for inflation.</p>
 <p>Data Source: Consumer Price Index for All Urban Consumers (CPI-U) [Source: <a href="https://www.bls.gov/cpi/research-series/r-cpi-u-rs-home.htm">Bureau of Labor Statistics</a>]</p>
-<div id="01f88627" class="cell" data-execution_count="6">
+<div id="32b04840" class="cell" data-execution_count="6">
 <details class="code-fold">
 <summary>Show the code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Usage</span></span>
@@ -666,7 +666,7 @@ Tip
 <span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a>df_CPI</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
-<div class="cell-output cell-output-display" data-execution_count="5">
+<div class="cell-output cell-output-display" data-execution_count="21">
 <div>
 
 
@@ -1519,7 +1519,7 @@ Tip
 <section id="define-census-variables" class="level4">
 <h4 class="anchored" data-anchor-id="define-census-variables">Define Census Variables</h4>
 <p>Define the specific ACS variables we need for this analysis. Table B19013 provides median household income, while Table B19001 provides the household income distribution across 16 income brackets. These brackets allow us to calculate weighted averages and estimate medians when direct values are unavailable.</p>
-<div id="cfde01e6" class="cell" data-execution_count="7">
+<div id="ba0b898e" class="cell" data-execution_count="7">
 <details class="code-fold">
 <summary>Show the code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Define variables to download</span></span>
@@ -1550,7 +1550,7 @@ Tip
 <section id="state-level-data" class="level4">
 <h4 class="anchored" data-anchor-id="state-level-data">State Level Data</h4>
 <p>Retrieve state-level income data for Utah. While we’ll primarily use smaller geographies, state-level data provides a useful benchmark for comparison and validation.</p>
-<div id="a1cd3bc4" class="cell" data-execution_count="8">
+<div id="15203f5d" class="cell" data-execution_count="8">
 <details class="code-fold">
 <summary>Show the code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Fetch state boundaries from TIGER/Line shapefiles</span></span>
@@ -1583,7 +1583,7 @@ Tip
 <span id="cb11-28"><a href="#cb11-28" aria-hidden="true" tabindex="-1"></a><span class="co"># Preview data</span></span>
 <span id="cb11-29"><a href="#cb11-29" aria-hidden="true" tabindex="-1"></a>gdf_ut_income</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
-<div class="cell-output cell-output-display" data-execution_count="7">
+<div class="cell-output cell-output-display" data-execution_count="23">
 <div>
 
 
@@ -1653,7 +1653,7 @@ Tip
 <h2 data-number="6" class="anchored" data-anchor-id="intermediate-calculations"><span class="header-section-number">6</span> Intermediate Calculations</h2>
 <section id="income-groupings-approximate-income-quartiles" class="level3">
 <h3 class="anchored" data-anchor-id="income-groupings-approximate-income-quartiles">Income Groupings (Approximate Income Quartiles)</h3>
-<div id="4e8c5ab3" class="cell" data-execution_count="9">
+<div id="b1cb105e" class="cell" data-execution_count="9">
 <details class="code-fold">
 <summary>Show the code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Create a copy of lookup table to work with</span></span>
@@ -1691,7 +1691,7 @@ Tip
 <span id="cb12-33"><a href="#cb12-33" aria-hidden="true" tabindex="-1"></a><span class="co"># Display the dataframe</span></span>
 <span id="cb12-34"><a href="#cb12-34" aria-hidden="true" tabindex="-1"></a>df_inc_group</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
-<div class="cell-output cell-output-display" data-execution_count="8">
+<div class="cell-output cell-output-display" data-execution_count="24">
 <div>
 
 
@@ -1909,7 +1909,7 @@ Tip
 </div>
 </div>
 </div>
-<div id="bba010f3" class="cell" data-execution_count="10">
+<div id="20494f1a" class="cell" data-execution_count="10">
 <details class="code-fold">
 <summary>Show the code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Prepare data for seaborn</span></span>
@@ -1975,7 +1975,7 @@ Tip
 </section>
 <section id="median-income-in-model-base-year-dollars" class="level3">
 <h3 class="anchored" data-anchor-id="median-income-in-model-base-year-dollars">Median Income (in Model Base Year Dollars)</h3>
-<div id="3eaa2425" class="cell" data-execution_count="11">
+<div id="12e32a12" class="cell" data-execution_count="11">
 <details class="code-fold">
 <summary>Show the code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Define income categories</span></span>
@@ -2033,7 +2033,7 @@ Tip
 <span id="cb14-53"><a href="#cb14-53" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb14-54"><a href="#cb14-54" aria-hidden="true" tabindex="-1"></a>df_median_income</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
-<div class="cell-output cell-output-display" data-execution_count="10">
+<div class="cell-output cell-output-display" data-execution_count="26">
 <div>
 
 
@@ -2084,7 +2084,7 @@ Tip
 <h3 class="anchored" data-anchor-id="value-of-time-in-model-base-year-dollars">Value of Time (in Model Base Year Dollars)</h3>
 <section id="calculate-hourly-income" class="level4">
 <h4 class="anchored" data-anchor-id="calculate-hourly-income">Calculate Hourly Income</h4>
-<div id="f3df6bfd" class="cell" data-execution_count="12">
+<div id="3fddd320" class="cell" data-execution_count="12">
 <details class="code-fold">
 <summary>Show the code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Extract median incomes and calculate hourly rates</span></span>
@@ -2112,7 +2112,7 @@ Median Income ($/hr)   $44.11   $10.98    $54.55</code></pre>
 </section>
 <section id="setup-vot-calculation-helper" class="level4">
 <h4 class="anchored" data-anchor-id="setup-vot-calculation-helper">Setup VOT Calculation Helper</h4>
-<div id="40a451ac" class="cell" data-execution_count="13">
+<div id="03980d27" class="cell" data-execution_count="13">
 <details class="code-fold">
 <summary>Show the code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Hardcoded VOT percentages from previous calculations</span></span>
@@ -2133,7 +2133,7 @@ Median Income ($/hr)   $44.11   $10.98    $54.55</code></pre>
 </section>
 <section id="calculate-and-display-work-personal-vot" class="level4">
 <h4 class="anchored" data-anchor-id="calculate-and-display-work-personal-vot">Calculate and Display Work &amp; Personal VOT</h4>
-<div id="d2cd2c79" class="cell" data-execution_count="14">
+<div id="52a17731" class="cell" data-execution_count="14">
 <details class="code-fold">
 <summary>Show the code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Calculate all VOT metrics</span></span>
@@ -2185,7 +2185,7 @@ Value of Time - Personal (cent/min)      22       9       25
 </section>
 <section id="calculate-and-display-truck-vot" class="level4">
 <h4 class="anchored" data-anchor-id="calculate-and-display-truck-vot">Calculate and Display Truck VOT</h4>
-<div id="2b216284" class="cell" data-execution_count="15">
+<div id="b4239e5b" class="cell" data-execution_count="15">
 <details class="code-fold">
 <summary>Show the code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Calculate Truck VOT</span></span>
@@ -2226,7 +2226,7 @@ Medium      87%         $38.38             64               $38.40
 <h2 data-number="7" class="anchored" data-anchor-id="export-results"><span class="header-section-number">7</span> Export Results</h2>
 <section id="create-final-vot-table" class="level3">
 <h3 class="anchored" data-anchor-id="create-final-vot-table">Create Final VOT Table</h3>
-<div id="e2328473" class="cell" data-execution_count="16">
+<div id="6f6fb0f8" class="cell" data-execution_count="16">
 <details class="code-fold">
 <summary>Show the code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Extract VOT summary table</span></span>
@@ -2316,7 +2316,7 @@ VOT_Auto_Per_Hi            25.0      $15.0</code></pre>
 </section>
 <section id="export-to-csv" class="level3">
 <h3 class="anchored" data-anchor-id="export-to-csv">Export to CSV</h3>
-<div id="ab62f315" class="cell" data-execution_count="17">
+<div id="0913f2bd" class="cell" data-execution_count="17">
 <details class="code-fold">
 <summary>Show the code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Create output directory if it doesn't exist</span></span>
@@ -2817,7 +2817,7 @@ VOT_Auto_Per_Hi            25.0      $15.0</code></pre>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb25" data-shortcodes="false"><pre class="sourceCode markdown code-with-copy"><code class="sourceCode markdown"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
 <span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a><span class="an">title:</span><span class="co"> Value of Time Estimation</span></span>
 <span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a><span class="an">subtitle:</span><span class="co"> Estimating the Value of Time Parameter for Utah's Travel Demand Model</span></span>
-<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a><span class="an">description:</span><span class="co"> This notebook replicates the analysis from the '_archive/_Source - Med Income &amp; Value of Time - 2022-08-09.xlsb' using the WFRC PUMA. The values of time are segmented by occupancy and purpose (work vs. non-work).</span></span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a><span class="an">description:</span><span class="co"> This notebook replicates the analysis from the '_archive/_Source - Med Income &amp; Value of Time - 2022-08-09.xlsb' using the Utah Household Data. The values of time are segmented by occupancy and purpose (work vs. personal).</span></span>
 <span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a><span class="an">author:</span></span>
 <span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a><span class="co"> - name: Pukar Bhandari</span></span>
 <span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a><span class="co">   email: pukar.bhandari@wfrc.utah.gov</span></span>

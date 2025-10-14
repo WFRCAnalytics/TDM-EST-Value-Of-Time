@@ -1,7 +1,7 @@
 ---
 title: Value of Time Estimation
 subtitle: Estimating the Value of Time Parameter for Utah's Travel Demand Model
-description: This notebook replicates the analysis from the '_archive/_Source - Med Income & Value of Time - 2022-08-09.xlsb' using the WFRC PUMA. The values of time are segmented by occupancy and purpose (work vs. non-work).
+description: This notebook replicates the analysis from the '_archive/_Source - Med Income & Value of Time - 2022-08-09.xlsb' using the Utah Household Data. The values of time are segmented by occupancy and purpose (work vs. personal).
 author:
  - name: Pukar Bhandari
    email: pukar.bhandari@wfrc.utah.gov
