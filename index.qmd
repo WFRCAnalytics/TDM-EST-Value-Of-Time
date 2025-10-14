@@ -8,7 +8,7 @@ author:
    affiliation:
      - name: Wasatch Front Regional Council
        url: "https://wfrc.utah.gov/"
-date: "2025-10-08"
+date: "2025-10-14"
 
 execute:
    eval: true
@@ -45,9 +45,7 @@ title-block-banner: true
 
 ## Introduction
 
-This analysis calculates median household income for Transportation Analysis Zones (TAZ) across Utah using data from the 2019-2023 American Community Survey (ACS). The methodology employs spatial interpolation techniques to transfer income data from Census geographies (block groups and blocks) to TAZ boundaries, accounting for spatial overlaps and using household counts as weights.
 
-The process involves several key steps: obtaining income data at the block group level, distributing this data to census blocks, and then aggregating to TAZ boundaries using area-weighted interpolation. This ensures that income estimates accurately reflect the spatial distribution of households within each TAZ.
 
 ## Environment Setup
 
@@ -116,3 +114,508 @@ This enables fetching US Census data from the Census API.
 # Set your API key into environment (alternative to .env file)
 os.environ['CENSUS_API_KEY'] = 'your_api_key_here'
 ```
+
+## Define Helper Functions
+
+### Fetch Excel Files from BLS or BTS
+
+```{python}
+def fetch_excel(path, url):
+    """
+    Download Excel file if it doesn't exist locally.
+
+    Parameters:
+    -----------
+    path : str or Path
+        Local file path to save the Excel file
+    url : str
+        URL to download the Excel file from
+    """
+    # Convert to Path object if string
+    filepath = Path(path)
+
+    # Download file if it doesn't exist
+    if not filepath.exists():
+        filepath.parent.mkdir(parents=True, exist_ok=True)
+
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+        }
+
+        response = requests.get(url, headers=headers)
+        filepath.write_bytes(response.content)
+```
+
+## Lookup Tables
+
+### Income Category Lookup
+
+Create a reference table defining the income brackets used in ACS Table B19001. Each bracket has a lower and upper limit, and we calculate midpoints for median estimation. The highest bracket ($200,000+) uses $300,000 as a reasonable midpoint based on income distribution patterns.
+
+```{python}
+lookup_hhinc = pd.DataFrame({
+  "Income Category": [
+    "HH_LT_10K", "HH_10_15K", "HH_15_20K", "HH_20_25K", "HH_25_30K", "HH_30_35K",
+    "HH_35_40K", "HH_40_45K", "HH_45_50K", "HH_50_60K", "HH_60_75K",
+    "HH_75_100K", "HH_100_125K", "HH_125_150K", "HH_150_200K", "HH_GT_200K"
+  ],
+  "Lower Limit": [
+    0, 10000, 15000, 20000, 25000, 30000,
+    35000, 40000, 45000, 50000, 60000,
+    75000, 100000, 125000, 150000, 200000
+  ],
+  "Upper Limit": [
+    9999, 14999, 19999, 24999, 29999, 34999,
+    39999, 44999, 49999, 59999, 74999,
+    99999, 124999, 149999, 199999, np.inf
+  ]
+})
+
+# Compute midpoint and round it
+lookup_hhinc['Midpoint'] = (
+  (lookup_hhinc['Lower Limit'] + lookup_hhinc['Upper Limit']) / 2
+).round()
+
+# Replace infinite midpoint (last category) with 300000
+lookup_hhinc.loc[np.isinf(lookup_hhinc["Upper Limit"]), "Midpoint"] = 300000
+
+lookup_hhinc
+```
+
+## Raw Data Sources
+
+### Consumer Price Index
+
+The Consumer Price Index (CPI-U-RS) from the Bureau of Labor Statistics provides inflation adjustment factors. This will be useful for comparing income values across different time periods or adjusting historical data to current dollars. The research series (R-CPI-U-RS) is particularly appropriate for longitudinal analysis as it uses consistent methodology throughout the time series.
+
+Download and load the CPI data directly from the BLS website. The data includes annual average CPI values that can be used to adjust income figures for inflation.
+
+Data Source: Consumer Price Index for All Urban Consumers (CPI-U) \[Source: [Bureau of Labor Statistics](https://www.bls.gov/cpi/research-series/r-cpi-u-rs-home.htm)\]
+
+```{python}
+# Usage
+filepath_cpi = Path("_data/bls/r-cpi-u-rs-allitems.xlsx")
+url_cpi = "https://www.bls.gov/cpi/research-series/r-cpi-u-rs-allitems.xlsx"
+
+# Download if needed
+fetch_excel(path=filepath_cpi, url=url_cpi)
+
+# Read separately
+df_CPI = pd.read_excel(
+    filepath_cpi,
+    sheet_name="All items",
+    usecols="A:N",
+    skiprows=5,
+    engine='openpyxl'
+)
+
+df_CPI
+```
+
+### American Community Survey (ACS) 5-Year Estimates
+
+#### Define Census Variables
+
+Define the specific ACS variables we need for this analysis. Table B19013 provides median household income, while Table B19001 provides the household income distribution across 16 income brackets. These brackets allow us to calculate weighted averages and estimate medians when direct values are unavailable.
+
+```{python}
+# Define variables to download
+acs_variables = {
+    'B19013_001E': 'HH_MED_INC',  # Median Household Income in the Past 12 Months (in 2023 Inflation-Adjusted Dollars)
+    'B19013_001M': 'HH_MED_INC_MOE',  # Margin of Error for Median Household Income
+    'B19001_001E': 'HH_TOTAL',  # Total Households
+    'B19001_002E': 'HH_LT_10K',  # Less than $10,000
+    'B19001_003E': 'HH_10_15K',  # $10,000 to $14,999
+    'B19001_004E': 'HH_15_20K',  # $15,000 to $19,999
+    'B19001_005E': 'HH_20_25K',  # $20,000 to $24,999
+    'B19001_006E': 'HH_25_30K',  # $25,000 to $29,999
+    'B19001_007E': 'HH_30_35K',  # $30,000 to $34,999
+    'B19001_008E': 'HH_35_40K',  # $35,000 to $39,999
+    'B19001_009E': 'HH_40_45K',  # $40,000 to $44,999
+    'B19001_010E': 'HH_45_50K',  # $45,000 to $49,999
+    'B19001_011E': 'HH_50_60K',  # $50,000 to $59,999
+    'B19001_012E': 'HH_60_75K',  # $60,000 to $74,999
+    'B19001_013E': 'HH_75_100K',  # $75,000 to $99,999
+    'B19001_014E': 'HH_100_125K',  # $100,000 to $124,999
+    'B19001_015E': 'HH_125_150K',  # $125,000 to $149,999
+    'B19001_016E': 'HH_150_200K',  # $150,000 to $199,999
+    'B19001_017E': 'HH_GT_200K'  # $200,000 or more
+}
+```
+
+#### State Level Data
+
+Retrieve state-level income data for Utah. While we'll primarily use smaller geographies, state-level data provides a useful benchmark for comparison and validation.
+
+```{python}
+# Fetch state boundaries from TIGER/Line shapefiles
+gdf_ut_bound = states(
+  year=2023,
+  cache=True
+).to_crs(PROJECT_CRS)
+
+# Filter for Utah only
+gdf_ut_bound = gdf_ut_bound[gdf_ut_bound['STATEFP'] == str(STATE_FIPS)]
+
+# Fetch Income data from ACS 5-year estimates for Utah
+df_ut_income = get_census(
+  dataset="acs/acs5",
+  year=2023,
+  variables=list(acs_variables.keys()),
+  params={
+      # "key": f"{os.getenv('CENSUS_API_KEY')}", # FIXME: This causes error
+      "for": f"state:{STATE_FIPS}"
+    },
+    return_geoid=True,
+    guess_dtypes=True
+)
+
+# Join ACS data to block group boundaries and transform CRS
+gdf_ut_income = gdf_ut_bound[['GEOID', 'STATEFP', 'NAME', 'geometry']].merge(
+    df_ut_income, on = "GEOID"
+).to_crs(PROJECT_CRS).rename(columns=acs_variables)
+
+# Preview data
+gdf_ut_income
+```
+
+## Intermediate Calculations
+
+### Income Groupings (Approximate Income Quartiles)
+
+```{python}
+# Create a copy of lookup table to work with
+df_inc_group = lookup_hhinc.copy()
+
+# Get the income category columns from gdf_ut_income
+# Extract just the income bracket counts (excluding totals and medians)
+income_cols = [col for col in gdf_ut_income.columns if col.startswith('HH_')
+               and col not in ['HH_TOTAL', 'HH_MED_INC', 'HH_MED_INC_MOE']]
+
+# Create a mapping between lookup categories and gdf_ut_income columns
+# They should already match, but let's be explicit
+df_inc_group['State HH'] = df_inc_group['Income Category'].map(
+    gdf_ut_income[income_cols].iloc[0].to_dict()
+)
+
+# Calculate percentage of households
+total_hh = df_inc_group['State HH'].sum()
+df_inc_group['% HH'] = (df_inc_group['State HH'] / total_hh * 100).round(1)
+
+# Calculate cumulative percentage
+df_inc_group['Cum % HH'] = df_inc_group['% HH'].cumsum().round(1)
+
+# Assign income groups based on quartiles (25%, 50%, 75%, 100%)
+df_inc_group['Inc Group'] = pd.cut(
+    df_inc_group['Cum % HH'],
+    bins=[0, 25, 50, 75, 100],
+    labels=['Inc Group 1', 'Inc Group 2', 'Inc Group 3', 'Inc Group 4'],
+    include_lowest=True
+)
+
+# Calculate HH_MedInc_Product (HH * Midpoint)
+df_inc_group['HH_MedInc_Product'] = df_inc_group['State HH'] * df_inc_group['Midpoint']
+
+# Display the dataframe
+df_inc_group
+```
+
+
+```{python}
+#| fig-cap: "Household Income Distribution by Quartile"
+
+# Prepare data for seaborn
+df_plot = df_inc_group.copy()
+df_plot['Income Label'] = df_plot['Income Category'].str.replace('HH_', '').str.replace('_', '\n')
+df_plot['index'] = range(len(df_plot))
+
+# Define colors for each income group
+palette = {'Inc Group 1': '#3498db', 'Inc Group 2': '#2ecc71',
+           'Inc Group 3': '#f39c12', 'Inc Group 4': '#e74c3c'}
+
+# Set seaborn style and context
+sns.set_style("whitegrid")
+sns.set_context("notebook")
+
+# Create barplot using seaborn
+plt.figure(figsize=(12, 6))
+sns.barplot(
+    data=df_plot,
+    x='index',
+    y='State HH',
+    hue='Inc Group',
+    palette=palette,
+    legend=True,
+    dodge=False
+)
+
+# Customize plot
+plt.xlabel('Income Category', fontsize=11, fontweight='bold')
+plt.ylabel('Number of Households', fontsize=11, fontweight='bold')
+plt.title('Utah Household Income Distribution by Quartile',
+          fontsize=13, fontweight='bold', pad=20)
+
+# Format y-axis with comma separator
+plt.gca().yaxis.set_major_formatter(ticker.FuncFormatter(lambda x, p: f'{x:,.0f}'))
+
+# Set x-axis labels
+plt.xticks(range(len(df_plot)), df_plot['Income Label'],
+           rotation=45, ha='right', fontsize=9)
+
+# Customize legend
+plt.legend(loc='upper left', frameon=True, fontsize=10, title='')
+
+# Grid styling
+plt.grid(axis='y', alpha=0.3, linestyle='--')
+plt.gca().set_axisbelow(True)
+
+# Remove top and right spines for cleaner look
+sns.despine()
+
+plt.tight_layout()
+plt.show()
+```
+
+### Median Income (in Model Base Year Dollars)
+
+```{python}
+# Define income categories
+categories = {
+    'Average': df_inc_group,
+    'Low Inc': df_inc_group[df_inc_group['Inc Group'] == 'Inc Group 1'],
+    'High Inc': df_inc_group[df_inc_group['Inc Group'] != 'Inc Group 1']
+}
+
+# Calculate metrics for each category
+summary_data = {}
+for cat_name, cat_df in categories.items():
+    summary_data[cat_name] = {
+        'Sum HH': cat_df['State HH'].sum(),
+        'Sum HH * Inc': cat_df['HH_MedInc_Product'].sum(),
+    }
+    # Calculate unadjusted median income
+    summary_data[cat_name]['Unadj Med Inc'] = (
+        summary_data[cat_name]['Sum HH * Inc'] / summary_data[cat_name]['Sum HH']
+    )
+
+# Calculate correction factor from Average category
+actual_median_income = gdf_ut_income['HH_MED_INC'].iloc[0]
+correction_factor = actual_median_income / summary_data['Average']['Unadj Med Inc']
+inflation_factor = 1.0
+
+# Apply correction and inflation factors
+for cat_name in summary_data:
+    # summary_data[cat_name]['Correction Factor'] = correction_factor
+    summary_data[cat_name]['Adj Med Income'] = (
+        summary_data[cat_name]['Unadj Med Inc'] * correction_factor
+    )
+    # summary_data[cat_name]['Inflation Adj Factor'] = inflation_factor
+    summary_data[cat_name]['Median Income'] = (
+        summary_data[cat_name]['Adj Med Income'] * inflation_factor
+    )
+
+# Convert to DataFrame
+df_summary = pd.DataFrame(summary_data).T
+
+# Format for display
+format_specs = {
+    'Sum HH': '{:,.0f}',
+    'Sum HH * Inc': '{:,.0f}',
+    'Unadj Med Inc': '${:,.0f}',
+    # 'Correction Factor': '{:.4f}',
+    'Adj Med Income': '${:,.0f}',
+    # 'Inflation Adj Factor': '{:.4f}',
+    'Median Income': '${:,.0f}'
+}
+
+df_median_income = df_summary.copy()
+for col, fmt in format_specs.items():
+    df_median_income[col] = df_summary[col].apply(lambda x: fmt.format(x))
+
+df_median_income
+```
+
+### Value of Time (in Model Base Year Dollars)
+
+#### Calculate Hourly Income
+
+```{python}
+# Extract median incomes and calculate hourly rates
+median_income = df_summary.loc[['Average', 'Low Inc', 'High Inc'], 'Median Income']
+median_income_hr = median_income / 2080
+
+print("=" * 80)
+print("HOURLY INCOME & ESTIMATED WAGE RATE")
+print("=" * 80)
+df_hourly_display = pd.DataFrame({
+    cat: [f"${median_income[cat]:,.0f}", f"${median_income_hr[cat]:.2f}"]
+    for cat in ['Average', 'Low Inc', 'High Inc']
+}, index=['Median Income', 'Median Income ($/hr)'])
+print(df_hourly_display.to_string())
+```
+
+#### Setup VOT Calculation Helper
+
+```{python}
+# Hardcoded VOT percentages from previous calculations
+vot_percentages = pd.DataFrame({
+    'Work': [0.39, 0.62, 0.34],
+    'Personal': [0.30, 0.49, 0.27]
+}, index=['Average', 'Low Inc', 'High Inc'])
+
+# Helper function to calculate VOT metrics
+def calculate_vot(hourly_rate, percentage):
+    """Calculate VOT metrics: unrounded rate, VOT cents/min, equivalent rate"""
+    unrounded_hr = hourly_rate * percentage
+    vot_cents = round(unrounded_hr * 100 / 60, 0)
+    equiv_hr = vot_cents * 60 / 100
+    return unrounded_hr, vot_cents, equiv_hr
+```
+
+#### Calculate and Display Work & Personal VOT
+
+```{python}
+# Calculate all VOT metrics
+vot_results = {}
+for trip_type in ['Work', 'Personal']:
+    vot_results[trip_type] = {}
+    for income_cat in ['Average', 'Low Inc', 'High Inc']:
+        pct = vot_percentages.loc[income_cat, trip_type]
+        vot_results[trip_type][income_cat] = calculate_vot(median_income_hr[income_cat], pct)
+
+# Display Work & Personal VOT
+print("\n" + "=" * 80)
+print("WORK & PERSONAL VALUE OF TIME")
+print("=" * 80)
+rows = []
+for trip_type in ['Work', 'Personal']:
+    rows.extend([
+        {'Metric': f'% of Med Income - {trip_type}',
+         **{cat: f"{vot_percentages.loc[cat, trip_type]:.0%}" for cat in ['Average', 'Low Inc', 'High Inc']}},
+        {'Metric': f'Unrounded Hr Rate - {trip_type} ($/hr)',
+         **{cat: f"${vot_results[trip_type][cat][0]:.2f}" for cat in ['Average', 'Low Inc', 'High Inc']}},
+        {'Metric': f'Value of Time - {trip_type} (cent/min)',
+         **{cat: f"{vot_results[trip_type][cat][1]:.0f}" for cat in ['Average', 'Low Inc', 'High Inc']}},
+        {'Metric': f'Equiv Hr Rate - {trip_type} ($/hr)',
+         **{cat: f"${vot_results[trip_type][cat][2]:.2f}" for cat in ['Average', 'Low Inc', 'High Inc']}}
+    ])
+    if trip_type == 'Work':
+        rows.append({'Metric': '', 'Average': '', 'Low Inc': '', 'High Inc': ''})
+
+print(pd.DataFrame(rows).to_string(index=False))
+```
+
+#### Calculate and Display Truck VOT
+
+```{python}
+# Calculate Truck VOT
+print("\n" + "=" * 80)
+print("TRUCK VALUE OF TIME")
+print("=" * 80)
+
+truck_config = [('Light', 0.65), ('Medium', 0.87), ('Heavy', 1.10)]
+truck_rows = []
+
+for truck_type, pct in truck_config:
+    unrounded, vot, equiv = calculate_vot(median_income_hr['Average'], pct)
+    truck_rows.append({
+        'Type': truck_type,
+        '% of Inc': f"{pct:.0%}",
+        'Hr Rate ($/hr)': f"${unrounded:.2f}",
+        'VOT (cent/min)': f"{vot:.0f}",
+        'Equiv Hr Rate ($/hr)': f"${equiv:.2f}"
+    })
+
+print(pd.DataFrame(truck_rows).to_string(index=False))
+```
+
+## Export Results
+
+### Create Final VOT Table
+
+```{python}
+# Extract VOT summary table
+vot_summary = []
+
+# Auto Work and Personal - Average
+vot_summary.extend([
+    {
+        'Parameter': 'VOT_Auto_Wrk',
+        'VOT (cent/min)': vot_results['Work']['Average'][1],
+        'VOT ($/hr)': f"${vot_results['Work']['Average'][2]:.1f}"
+    },
+    {
+        'Parameter': 'VOT_Auto_Per',
+        'VOT (cent/min)': vot_results['Personal']['Average'][1],
+        'VOT ($/hr)': f"${vot_results['Personal']['Average'][2]:.1f}"
+    },
+    {
+        'Parameter': 'VOT_Auto_Ext',
+        'VOT (cent/min)': round((vot_results['Work']['Average'][1] + vot_results['Personal']['Average'][1]) / 2),
+        'VOT ($/hr)': f"${(vot_results['Work']['Average'][2] + vot_results['Personal']['Average'][2]) / 2:.1f}"
+    }
+])
+
+# Truck VOT
+for truck_type, pct in [('LT', 0.65), ('MD', 0.87), ('HV', 1.10)]:
+    _, vot, equiv = calculate_vot(median_income_hr['Average'], pct)
+    vot_summary.append({
+        'Parameter': f'VOT_{truck_type}',
+        'VOT (cent/min)': vot,
+        'VOT ($/hr)': f"${equiv:.1f}"
+    })
+
+# Auto Work and Personal - Low Income
+vot_summary.extend([
+    {
+        'Parameter': 'VOT_Auto_Wrk_Lo',
+        'VOT (cent/min)': vot_results['Work']['Low Inc'][1],
+        'VOT ($/hr)': f"${vot_results['Work']['Low Inc'][2]:.1f}"
+    },
+    {
+        'Parameter': 'VOT_Auto_Per_Lo',
+        'VOT (cent/min)': vot_results['Personal']['Low Inc'][1],
+        'VOT ($/hr)': f"${vot_results['Personal']['Low Inc'][2]:.1f}"
+    }
+])
+
+# Auto Work and Personal - High Income
+vot_summary.extend([
+    {
+        'Parameter': 'VOT_Auto_Wrk_Hi',
+        'VOT (cent/min)': vot_results['Work']['High Inc'][1],
+        'VOT ($/hr)': f"${vot_results['Work']['High Inc'][2]:.1f}"
+    },
+    {
+        'Parameter': 'VOT_Auto_Per_Hi',
+        'VOT (cent/min)': vot_results['Personal']['High Inc'][1],
+        'VOT ($/hr)': f"${vot_results['Personal']['High Inc'][2]:.1f}"
+    }
+])
+
+# Create and display final VOT table
+df_vot_final = pd.DataFrame(vot_summary)
+
+print("=" * 60)
+print("VALUE OF TIME PARAMETERS")
+print("=" * 60)
+print(df_vot_final.to_string(index=False))
+```
+
+### Export to CSV
+
+```{python}
+# Create output directory if it doesn't exist
+output_dir = Path("_output")
+output_dir.mkdir(parents=True, exist_ok=True)
+
+# Export to CSV
+df_vot_final.to_csv(
+    output_dir / "value_of_time.csv",
+    index=False
+)
+```
+
+::: {.callout-tip title="Download the output files:"}
+[value_of_time.csv](./_output/value_of_time.csv)
+:::
