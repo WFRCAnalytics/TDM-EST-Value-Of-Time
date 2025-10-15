@@ -447,11 +447,11 @@ inflation_factor = 1.0
 
 # Apply correction and inflation factors
 for cat_name in summary_data:
-    # summary_data[cat_name]['Correction Factor'] = correction_factor
+    summary_data[cat_name]['Correction Factor'] = correction_factor
     summary_data[cat_name]['Adj Med Income'] = (
         summary_data[cat_name]['Unadj Med Inc'] * correction_factor
     )
-    # summary_data[cat_name]['Inflation Adj Factor'] = inflation_factor
+    summary_data[cat_name]['Inflation Adj Factor'] = inflation_factor
     summary_data[cat_name]['Median Income'] = (
         summary_data[cat_name]['Adj Med Income'] * inflation_factor
     )
@@ -464,9 +464,9 @@ format_specs = {
     'Sum HH': '{:,.0f}',
     'Sum HH * Inc': '{:,.0f}',
     'Unadj Med Inc': '${:,.0f}',
-    # 'Correction Factor': '{:.4f}',
+    'Correction Factor': '{:.4f}',
     'Adj Med Income': '${:,.0f}',
-    # 'Inflation Adj Factor': '{:.4f}',
+    'Inflation Adj Factor': '{:.4f}',
     'Median Income': '${:,.0f}'
 }
 

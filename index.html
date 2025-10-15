@@ -364,7 +364,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="load-libraries" class="level3">
 <h3 class="anchored" data-anchor-id="load-libraries">Load Libraries</h3>
 <p>Import all required libraries for the analysis. The pygris library enables direct access to Census Bureau geographic data and ACS estimates through their API.</p>
-<div id="94df474d" class="cell" data-execution_count="1">
+<div id="1e7db88e" class="cell" data-execution_count="1">
 <details class="code-fold">
 <summary>Show the code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># For Analysis</span></span>
@@ -402,7 +402,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="environment-variables" class="level3">
 <h3 class="anchored" data-anchor-id="environment-variables">Environment Variables</h3>
 <p>We establish Utah-specific geographic parameters for the analysis. The NAD83 / UTM zone 12N coordinate reference system (EPSG:3566) is the standard projection for Utah, providing accurate distance measurements for spatial analysis. The state FIPS code (49) uniquely identifies Utah in federal datasets.</p>
-<div id="8118e0d7" class="cell" data-execution_count="2">
+<div id="6f704818" class="cell" data-execution_count="2">
 <details class="code-fold">
 <summary>Show the code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>PROJECT_CRS <span class="op">=</span> <span class="st">"EPSG:3566"</span>  <span class="co"># NAD83 / UTM zone 12N</span></span>
@@ -426,7 +426,7 @@ Tip
 <p>Create a <code>.env</code> file in the project directory and add your Census API key: <code>CENSUS_API_KEY=your-key-here</code> This enables fetching US Census data from the Census API.</p>
 </div>
 </div>
-<div id="c73239e4" class="cell" data-execution_count="3">
+<div id="6e7b7e9f" class="cell" data-execution_count="3">
 <details class="code-fold">
 <summary>Show the code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Set your API key into environment (alternative to .env file)</span></span>
@@ -441,7 +441,7 @@ Tip
 <section id="fetch-excel-files-from-bls-or-bts" class="level3">
 <h3 class="anchored" data-anchor-id="fetch-excel-files-from-bls-or-bts">Fetch Excel Files from BLS or BTS</h3>
 <p>This utility function automates downloading data files from federal agencies. It checks if a file already exists locally before attempting to download, avoiding unnecessary network requests and respecting the agencies’ servers. The function includes proper HTTP headers to ensure reliable downloads.</p>
-<div id="4a2aa625" class="cell" data-execution_count="4">
+<div id="30b846fc" class="cell" data-execution_count="4">
 <details class="code-fold">
 <summary>Show the code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> fetch_excel(path, url):</span>
@@ -479,7 +479,7 @@ Tip
 <h3 class="anchored" data-anchor-id="income-category-lookup">Income Category Lookup</h3>
 <p>The ACS reports household income in 16 predefined brackets rather than individual values. To perform calculations with this grouped data, we need to estimate representative income values for each bracket. This lookup table defines the boundaries of each income bracket and calculates midpoint values.</p>
 <p>For the highest income bracket ($200,000+), which has no upper limit, we use $300,000 as a reasonable midpoint. This value is based on research showing that high-income distributions typically concentrate between $200,000 and $400,000, with $300,000 representing a conservative central estimate.Create a reference table defining the income brackets used in ACS Table B19001. Each bracket has a lower and upper limit, and we calculate midpoints for median estimation. The highest bracket ($200,000+) uses $300,000 as a reasonable midpoint based on income distribution patterns.</p>
-<div id="8a024856" class="cell" data-execution_count="5">
+<div id="24a2666c" class="cell" data-execution_count="5">
 <details class="code-fold">
 <summary>Show the code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>lookup_hhinc <span class="op">=</span> pd.DataFrame({</span>
@@ -652,7 +652,7 @@ Tip
 <h3 class="anchored" data-anchor-id="consumer-price-index">Consumer Price Index</h3>
 <p>The CPI-U-RS (Consumer Price Index for All Urban Consumers - Research Series) provides the most consistent measure of inflation over time. While we use current-year dollars in this analysis, having CPI data available enables future inflation adjustments and facilitates comparisons with historical VOT estimates. The research series is specifically designed for longitudinal analysis, maintaining methodological consistency that the standard CPI-U lacks.</p>
 <p>Data Source: Consumer Price Index for All Urban Consumers (CPI-U) [Source: <a href="https://www.bls.gov/cpi/research-series/r-cpi-u-rs-home.htm">Bureau of Labor Statistics</a>]</p>
-<div id="918edbd0" class="cell" data-execution_count="6">
+<div id="4ce6d7e7" class="cell" data-execution_count="6">
 <details class="code-fold">
 <summary>Show the code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Usage</span></span>
@@ -1532,7 +1532,7 @@ Tip
 <li><strong>Table B19001</strong>: Household count by income bracket (distribution)</li>
 </ul>
 <p>The income brackets in B19001 align perfectly with our lookup table, allowing us to calculate weighted averages and validate the median income from B19013.</p>
-<div id="fc230253" class="cell" data-execution_count="7">
+<div id="ada34e25" class="cell" data-execution_count="7">
 <details class="code-fold">
 <summary>Show the code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Define variables to download</span></span>
@@ -1563,7 +1563,7 @@ Tip
 <section id="state-level-data" class="level4">
 <h4 class="anchored" data-anchor-id="state-level-data">State Level Data</h4>
 <p>We begin with state-level data for Utah to establish baseline income statistics. While our final VOT parameters may use more granular geographic data in the future, state-level estimates provide a robust foundation with minimal sampling error. The large sample size at the state level ensures that our calculated VOT parameters are statistically reliable.</p>
-<div id="858afb45" class="cell" data-execution_count="8">
+<div id="629a66e9" class="cell" data-execution_count="8">
 <details class="code-fold">
 <summary>Show the code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Fetch state boundaries from TIGER/Line shapefiles</span></span>
@@ -1672,7 +1672,7 @@ Tip
 <p>The quartile approach ensures that each income group contains roughly 25% of households, providing balanced sample sizes for model estimation. However, because ACS income brackets don’t align perfectly with quartile boundaries, we assign entire brackets to the quartile they predominantly fall within.</p>
 <p><strong>Income Group 1 (Low Income)</strong>: The first quartile of households by income. This group typically has the lowest VOT because they face tighter budget constraints and may be more willing to spend time to save money.</p>
 <p><strong>Income Groups 2-4 (Higher Income)</strong>: The upper three quartiles, which we sometimes aggregate as “high income” in contrast to the lowest quartile. These households generally have higher VOT because their opportunity cost of time is greater.</p>
-<div id="5ee656b7" class="cell" data-execution_count="9">
+<div id="feb9589c" class="cell" data-execution_count="9">
 <details class="code-fold">
 <summary>Show the code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Create a copy of lookup table to work with</span></span>
@@ -1928,7 +1928,7 @@ Tip
 </div>
 </div>
 </div>
-<div id="1c26ee56" class="cell" data-execution_count="10">
+<div id="7376be45" class="cell" data-execution_count="10">
 <details class="code-fold">
 <summary>Show the code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Prepare data for seaborn</span></span>
@@ -2002,7 +2002,7 @@ Tip
 <li><strong>ACS-reported median</strong>: The direct estimate from Table B19013</li>
 </ol>
 <p>The weighted average approach typically produces a value slightly different from the ACS median due to our simplified midpoint assumptions. We calculate a correction factor to align our estimates with the official ACS median for the full population, then apply this same correction proportionally to the income group medians. This ensures internal consistency while respecting the authoritative ACS estimates.</p>
-<div id="6941f1d6" class="cell" data-execution_count="11">
+<div id="36b5dd54" class="cell" data-execution_count="11">
 <details class="code-fold">
 <summary>Show the code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Define income categories</span></span>
@@ -2031,11 +2031,11 @@ Tip
 <span id="cb14-24"><a href="#cb14-24" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb14-25"><a href="#cb14-25" aria-hidden="true" tabindex="-1"></a><span class="co"># Apply correction and inflation factors</span></span>
 <span id="cb14-26"><a href="#cb14-26" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> cat_name <span class="kw">in</span> summary_data:</span>
-<span id="cb14-27"><a href="#cb14-27" aria-hidden="true" tabindex="-1"></a>    <span class="co"># summary_data[cat_name]['Correction Factor'] = correction_factor</span></span>
+<span id="cb14-27"><a href="#cb14-27" aria-hidden="true" tabindex="-1"></a>    summary_data[cat_name][<span class="st">'Correction Factor'</span>] <span class="op">=</span> correction_factor</span>
 <span id="cb14-28"><a href="#cb14-28" aria-hidden="true" tabindex="-1"></a>    summary_data[cat_name][<span class="st">'Adj Med Income'</span>] <span class="op">=</span> (</span>
 <span id="cb14-29"><a href="#cb14-29" aria-hidden="true" tabindex="-1"></a>        summary_data[cat_name][<span class="st">'Unadj Med Inc'</span>] <span class="op">*</span> correction_factor</span>
 <span id="cb14-30"><a href="#cb14-30" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb14-31"><a href="#cb14-31" aria-hidden="true" tabindex="-1"></a>    <span class="co"># summary_data[cat_name]['Inflation Adj Factor'] = inflation_factor</span></span>
+<span id="cb14-31"><a href="#cb14-31" aria-hidden="true" tabindex="-1"></a>    summary_data[cat_name][<span class="st">'Inflation Adj Factor'</span>] <span class="op">=</span> inflation_factor</span>
 <span id="cb14-32"><a href="#cb14-32" aria-hidden="true" tabindex="-1"></a>    summary_data[cat_name][<span class="st">'Median Income'</span>] <span class="op">=</span> (</span>
 <span id="cb14-33"><a href="#cb14-33" aria-hidden="true" tabindex="-1"></a>        summary_data[cat_name][<span class="st">'Adj Med Income'</span>] <span class="op">*</span> inflation_factor</span>
 <span id="cb14-34"><a href="#cb14-34" aria-hidden="true" tabindex="-1"></a>    )</span>
@@ -2048,9 +2048,9 @@ Tip
 <span id="cb14-41"><a href="#cb14-41" aria-hidden="true" tabindex="-1"></a>    <span class="st">'Sum HH'</span>: <span class="st">'</span><span class="sc">{:,.0f}</span><span class="st">'</span>,</span>
 <span id="cb14-42"><a href="#cb14-42" aria-hidden="true" tabindex="-1"></a>    <span class="st">'Sum HH * Inc'</span>: <span class="st">'</span><span class="sc">{:,.0f}</span><span class="st">'</span>,</span>
 <span id="cb14-43"><a href="#cb14-43" aria-hidden="true" tabindex="-1"></a>    <span class="st">'Unadj Med Inc'</span>: <span class="st">'$</span><span class="sc">{:,.0f}</span><span class="st">'</span>,</span>
-<span id="cb14-44"><a href="#cb14-44" aria-hidden="true" tabindex="-1"></a>    <span class="co"># 'Correction Factor': '{:.4f}',</span></span>
+<span id="cb14-44"><a href="#cb14-44" aria-hidden="true" tabindex="-1"></a>    <span class="st">'Correction Factor'</span>: <span class="st">'</span><span class="sc">{:.4f}</span><span class="st">'</span>,</span>
 <span id="cb14-45"><a href="#cb14-45" aria-hidden="true" tabindex="-1"></a>    <span class="st">'Adj Med Income'</span>: <span class="st">'$</span><span class="sc">{:,.0f}</span><span class="st">'</span>,</span>
-<span id="cb14-46"><a href="#cb14-46" aria-hidden="true" tabindex="-1"></a>    <span class="co"># 'Inflation Adj Factor': '{:.4f}',</span></span>
+<span id="cb14-46"><a href="#cb14-46" aria-hidden="true" tabindex="-1"></a>    <span class="st">'Inflation Adj Factor'</span>: <span class="st">'</span><span class="sc">{:.4f}</span><span class="st">'</span>,</span>
 <span id="cb14-47"><a href="#cb14-47" aria-hidden="true" tabindex="-1"></a>    <span class="st">'Median Income'</span>: <span class="st">'$</span><span class="sc">{:,.0f}</span><span class="st">'</span></span>
 <span id="cb14-48"><a href="#cb14-48" aria-hidden="true" tabindex="-1"></a>}</span>
 <span id="cb14-49"><a href="#cb14-49" aria-hidden="true" tabindex="-1"></a></span>
@@ -2071,7 +2071,9 @@ Tip
 <th data-quarto-table-cell-role="th">Sum HH</th>
 <th data-quarto-table-cell-role="th">Sum HH * Inc</th>
 <th data-quarto-table-cell-role="th">Unadj Med Inc</th>
+<th data-quarto-table-cell-role="th">Correction Factor</th>
 <th data-quarto-table-cell-role="th">Adj Med Income</th>
+<th data-quarto-table-cell-role="th">Inflation Adj Factor</th>
 <th data-quarto-table-cell-role="th">Median Income</th>
 </tr>
 </thead>
@@ -2081,7 +2083,9 @@ Tip
 <td>1,094,896</td>
 <td>124,503,122,500</td>
 <td>$113,712</td>
+<td>0.8069</td>
 <td>$91,750</td>
+<td>1.0000</td>
 <td>$91,750</td>
 </tr>
 <tr class="even">
@@ -2089,7 +2093,9 @@ Tip
 <td>262,353</td>
 <td>7,428,247,500</td>
 <td>$28,314</td>
+<td>0.8069</td>
 <td>$22,845</td>
+<td>1.0000</td>
 <td>$22,845</td>
 </tr>
 <tr class="odd">
@@ -2097,7 +2103,9 @@ Tip
 <td>832,543</td>
 <td>117,074,875,000</td>
 <td>$140,623</td>
+<td>0.8069</td>
 <td>$113,463</td>
+<td>1.0000</td>
 <td>$113,463</td>
 </tr>
 </tbody>
@@ -2127,7 +2135,7 @@ Tip
 <section id="calculate-hourly-income" class="level4">
 <h4 class="anchored" data-anchor-id="calculate-hourly-income">Calculate Hourly Income</h4>
 <p>We convert annual median income to an hourly rate by dividing by 2,080 hours (52 weeks × 40 hours/week). This assumes full-time, year-round employment, which is a standard convention in VOT estimation. While not every household member works full-time, this standardization allows consistent comparison across income groups and aligns with how wages are typically expressed.</p>
-<div id="13c31a65" class="cell" data-execution_count="12">
+<div id="8a912daf" class="cell" data-execution_count="12">
 <details class="code-fold">
 <summary>Show the code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Convert annual median income to hourly rate (assuming 2080 work hours/year)</span></span>
@@ -2145,29 +2153,29 @@ Tip
 <style type="text/css">
 </style>
 
-<table id="T_c84dd" class="caption-top table table-sm table-striped small">
+<table id="T_df72e" class="caption-top table table-sm table-striped small">
 <thead>
 <tr class="header">
 <th class="blank level0" data-quarto-table-cell-role="th">&nbsp;</th>
-<th id="T_c84dd_level0_col0" class="col_heading level0 col0" data-quarto-table-cell-role="th">Median Income</th>
-<th id="T_c84dd_level0_col1" class="col_heading level0 col1" data-quarto-table-cell-role="th">Hourly Rate</th>
+<th id="T_df72e_level0_col0" class="col_heading level0 col0" data-quarto-table-cell-role="th">Median Income</th>
+<th id="T_df72e_level0_col1" class="col_heading level0 col1" data-quarto-table-cell-role="th">Hourly Rate</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<th id="T_c84dd_level0_row0" class="row_heading level0 row0" data-quarto-table-cell-role="th">Average</th>
-<td id="T_c84dd_row0_col0" class="data row0 col0">$91,750</td>
-<td id="T_c84dd_row0_col1" class="data row0 col1">$44.11</td>
+<th id="T_df72e_level0_row0" class="row_heading level0 row0" data-quarto-table-cell-role="th">Average</th>
+<td id="T_df72e_row0_col0" class="data row0 col0">$91,750</td>
+<td id="T_df72e_row0_col1" class="data row0 col1">$44.11</td>
 </tr>
 <tr class="even">
-<th id="T_c84dd_level0_row1" class="row_heading level0 row1" data-quarto-table-cell-role="th">Low Inc</th>
-<td id="T_c84dd_row1_col0" class="data row1 col0">$22,845</td>
-<td id="T_c84dd_row1_col1" class="data row1 col1">$10.98</td>
+<th id="T_df72e_level0_row1" class="row_heading level0 row1" data-quarto-table-cell-role="th">Low Inc</th>
+<td id="T_df72e_row1_col0" class="data row1 col0">$22,845</td>
+<td id="T_df72e_row1_col1" class="data row1 col1">$10.98</td>
 </tr>
 <tr class="odd">
-<th id="T_c84dd_level0_row2" class="row_heading level0 row2" data-quarto-table-cell-role="th">High Inc</th>
-<td id="T_c84dd_row2_col0" class="data row2 col0">$113,463</td>
-<td id="T_c84dd_row2_col1" class="data row2 col1">$54.55</td>
+<th id="T_df72e_level0_row2" class="row_heading level0 row2" data-quarto-table-cell-role="th">High Inc</th>
+<td id="T_df72e_row2_col0" class="data row2 col0">$113,463</td>
+<td id="T_df72e_row2_col1" class="data row2 col1">$54.55</td>
 </tr>
 </tbody>
 </table>
@@ -2182,7 +2190,7 @@ Tip
 <p><strong>Personal Trips (lower %)</strong>: Reflect pure leisure time trade-offs. People are willing to spend more time traveling when they have flexibility and the marginal utility of saved time is lower.</p>
 <p><strong>Income Effects</strong>: Lower-income travelers often show higher VOT as a percentage of income for work trips (they can’t afford to be late) but lower for personal trips (more time-flexible). Higher-income travelers show the opposite pattern.</p>
 <p>These percentages have been calibrated in previous model validation efforts to match observed behavior patterns in the region.</p>
-<div id="40182039" class="cell" data-execution_count="13">
+<div id="58eddd03" class="cell" data-execution_count="13">
 <details class="code-fold">
 <summary>Show the code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Define VOT as percentage of hourly income for each trip purpose and income group</span></span>
@@ -2193,7 +2201,7 @@ Tip
 <span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>}, index<span class="op">=</span>[<span class="st">'Average'</span>, <span class="st">'Low Inc'</span>, <span class="st">'High Inc'</span>])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 </div>
-<div id="d35e17a5" class="cell" data-execution_count="14">
+<div id="185ea0cb" class="cell" data-execution_count="14">
 <details class="code-fold">
 <summary>Show the code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Calculate VOT in cents per minute (hourly rate * percentage * 100 / 60)</span></span>
@@ -2208,29 +2216,29 @@ Tip
 <style type="text/css">
 </style>
 
-<table id="T_d217a" class="caption-top table table-sm table-striped small">
+<table id="T_ec1f4" class="caption-top table table-sm table-striped small">
 <thead>
 <tr class="header">
 <th class="blank level0" data-quarto-table-cell-role="th">&nbsp;</th>
-<th id="T_d217a_level0_col0" class="col_heading level0 col0" data-quarto-table-cell-role="th">Work</th>
-<th id="T_d217a_level0_col1" class="col_heading level0 col1" data-quarto-table-cell-role="th">Personal</th>
+<th id="T_ec1f4_level0_col0" class="col_heading level0 col0" data-quarto-table-cell-role="th">Work</th>
+<th id="T_ec1f4_level0_col1" class="col_heading level0 col1" data-quarto-table-cell-role="th">Personal</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<th id="T_d217a_level0_row0" class="row_heading level0 row0" data-quarto-table-cell-role="th">Average</th>
-<td id="T_d217a_row0_col0" class="data row0 col0">$29.0</td>
-<td id="T_d217a_row0_col1" class="data row0 col1">$22.0</td>
+<th id="T_ec1f4_level0_row0" class="row_heading level0 row0" data-quarto-table-cell-role="th">Average</th>
+<td id="T_ec1f4_row0_col0" class="data row0 col0">$29.0</td>
+<td id="T_ec1f4_row0_col1" class="data row0 col1">$22.0</td>
 </tr>
 <tr class="even">
-<th id="T_d217a_level0_row1" class="row_heading level0 row1" data-quarto-table-cell-role="th">Low Inc</th>
-<td id="T_d217a_row1_col0" class="data row1 col0">$11.0</td>
-<td id="T_d217a_row1_col1" class="data row1 col1">$9.0</td>
+<th id="T_ec1f4_level0_row1" class="row_heading level0 row1" data-quarto-table-cell-role="th">Low Inc</th>
+<td id="T_ec1f4_row1_col0" class="data row1 col0">$11.0</td>
+<td id="T_ec1f4_row1_col1" class="data row1 col1">$9.0</td>
 </tr>
 <tr class="odd">
-<th id="T_d217a_level0_row2" class="row_heading level0 row2" data-quarto-table-cell-role="th">High Inc</th>
-<td id="T_d217a_row2_col0" class="data row2 col0">$31.0</td>
-<td id="T_d217a_row2_col1" class="data row2 col1">$25.0</td>
+<th id="T_ec1f4_level0_row2" class="row_heading level0 row2" data-quarto-table-cell-role="th">High Inc</th>
+<td id="T_ec1f4_row2_col0" class="data row2 col0">$31.0</td>
+<td id="T_ec1f4_row2_col1" class="data row2 col1">$25.0</td>
 </tr>
 </tbody>
 </table>
@@ -2241,7 +2249,7 @@ Tip
 <h4 class="anchored" data-anchor-id="calculate-and-display-work-personal-vot">Calculate and Display Work &amp; Personal VOT</h4>
 <p>We now calculate the final VOT values in cents per minute, the standard unit for travel demand models. The conversion from dollars per hour to cents per minute (multiplying by 100, dividing by 60) makes the values easier to work with in network assignment algorithms where travel times are typically in minutes.</p>
 <p><strong>Work VOT Results:</strong> These values represent how much travelers implicitly pay (in toll charges, fuel costs, or inconvenience) to save one minute of travel time on work-related trips. Higher-income travelers have higher work VOT, reflecting both their higher opportunity cost and their greater ability to pay for time savings.</p>
-<div id="0f334522" class="cell" data-execution_count="15">
+<div id="bb495611" class="cell" data-execution_count="15">
 <details class="code-fold">
 <summary>Show the code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Display Work VOT results</span></span>
@@ -2263,44 +2271,44 @@ Tip
 <style type="text/css">
 </style>
 
-<table id="T_f2681" class="caption-top table table-sm table-striped small">
+<table id="T_c365c" class="caption-top table table-sm table-striped small">
 <thead>
 <tr class="header">
 <th class="blank level0" data-quarto-table-cell-role="th">&nbsp;</th>
-<th id="T_f2681_level0_col0" class="col_heading level0 col0" data-quarto-table-cell-role="th">% of Income</th>
-<th id="T_f2681_level0_col1" class="col_heading level0 col1" data-quarto-table-cell-role="th">Unrounded ($/hr)</th>
-<th id="T_f2681_level0_col2" class="col_heading level0 col2" data-quarto-table-cell-role="th">VOT (¢/min)</th>
-<th id="T_f2681_level0_col3" class="col_heading level0 col3" data-quarto-table-cell-role="th">Equivalent ($/hr)</th>
+<th id="T_c365c_level0_col0" class="col_heading level0 col0" data-quarto-table-cell-role="th">% of Income</th>
+<th id="T_c365c_level0_col1" class="col_heading level0 col1" data-quarto-table-cell-role="th">Unrounded ($/hr)</th>
+<th id="T_c365c_level0_col2" class="col_heading level0 col2" data-quarto-table-cell-role="th">VOT (¢/min)</th>
+<th id="T_c365c_level0_col3" class="col_heading level0 col3" data-quarto-table-cell-role="th">Equivalent ($/hr)</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<th id="T_f2681_level0_row0" class="row_heading level0 row0" data-quarto-table-cell-role="th">Average</th>
-<td id="T_f2681_row0_col0" class="data row0 col0">39%</td>
-<td id="T_f2681_row0_col1" class="data row0 col1">$17.20</td>
-<td id="T_f2681_row0_col2" class="data row0 col2">29</td>
-<td id="T_f2681_row0_col3" class="data row0 col3">$17.40</td>
+<th id="T_c365c_level0_row0" class="row_heading level0 row0" data-quarto-table-cell-role="th">Average</th>
+<td id="T_c365c_row0_col0" class="data row0 col0">39%</td>
+<td id="T_c365c_row0_col1" class="data row0 col1">$17.20</td>
+<td id="T_c365c_row0_col2" class="data row0 col2">29</td>
+<td id="T_c365c_row0_col3" class="data row0 col3">$17.40</td>
 </tr>
 <tr class="even">
-<th id="T_f2681_level0_row1" class="row_heading level0 row1" data-quarto-table-cell-role="th">Low Inc</th>
-<td id="T_f2681_row1_col0" class="data row1 col0">62%</td>
-<td id="T_f2681_row1_col1" class="data row1 col1">$6.81</td>
-<td id="T_f2681_row1_col2" class="data row1 col2">11</td>
-<td id="T_f2681_row1_col3" class="data row1 col3">$6.60</td>
+<th id="T_c365c_level0_row1" class="row_heading level0 row1" data-quarto-table-cell-role="th">Low Inc</th>
+<td id="T_c365c_row1_col0" class="data row1 col0">62%</td>
+<td id="T_c365c_row1_col1" class="data row1 col1">$6.81</td>
+<td id="T_c365c_row1_col2" class="data row1 col2">11</td>
+<td id="T_c365c_row1_col3" class="data row1 col3">$6.60</td>
 </tr>
 <tr class="odd">
-<th id="T_f2681_level0_row2" class="row_heading level0 row2" data-quarto-table-cell-role="th">High Inc</th>
-<td id="T_f2681_row2_col0" class="data row2 col0">34%</td>
-<td id="T_f2681_row2_col1" class="data row2 col1">$18.55</td>
-<td id="T_f2681_row2_col2" class="data row2 col2">31</td>
-<td id="T_f2681_row2_col3" class="data row2 col3">$18.60</td>
+<th id="T_c365c_level0_row2" class="row_heading level0 row2" data-quarto-table-cell-role="th">High Inc</th>
+<td id="T_c365c_row2_col0" class="data row2 col0">34%</td>
+<td id="T_c365c_row2_col1" class="data row2 col1">$18.55</td>
+<td id="T_c365c_row2_col2" class="data row2 col2">31</td>
+<td id="T_c365c_row2_col3" class="data row2 col3">$18.60</td>
 </tr>
 </tbody>
 </table>
 </div>
 </div>
 <p><strong>Personal VOT Results:</strong> Personal trip VOT is consistently lower than work VOT across all income groups. The relative difference between income groups is also more pronounced, as higher-income households have more discretionary income to trade for leisure time convenience.</p>
-<div id="4255c7c7" class="cell" data-execution_count="16">
+<div id="15928cf4" class="cell" data-execution_count="16">
 <details class="code-fold">
 <summary>Show the code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Display Personal VOT results</span></span>
@@ -2322,37 +2330,37 @@ Tip
 <style type="text/css">
 </style>
 
-<table id="T_64dbe" class="caption-top table table-sm table-striped small">
+<table id="T_b7f3c" class="caption-top table table-sm table-striped small">
 <thead>
 <tr class="header">
 <th class="blank level0" data-quarto-table-cell-role="th">&nbsp;</th>
-<th id="T_64dbe_level0_col0" class="col_heading level0 col0" data-quarto-table-cell-role="th">% of Income</th>
-<th id="T_64dbe_level0_col1" class="col_heading level0 col1" data-quarto-table-cell-role="th">Unrounded ($/hr)</th>
-<th id="T_64dbe_level0_col2" class="col_heading level0 col2" data-quarto-table-cell-role="th">VOT (¢/min)</th>
-<th id="T_64dbe_level0_col3" class="col_heading level0 col3" data-quarto-table-cell-role="th">Equivalent ($/hr)</th>
+<th id="T_b7f3c_level0_col0" class="col_heading level0 col0" data-quarto-table-cell-role="th">% of Income</th>
+<th id="T_b7f3c_level0_col1" class="col_heading level0 col1" data-quarto-table-cell-role="th">Unrounded ($/hr)</th>
+<th id="T_b7f3c_level0_col2" class="col_heading level0 col2" data-quarto-table-cell-role="th">VOT (¢/min)</th>
+<th id="T_b7f3c_level0_col3" class="col_heading level0 col3" data-quarto-table-cell-role="th">Equivalent ($/hr)</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<th id="T_64dbe_level0_row0" class="row_heading level0 row0" data-quarto-table-cell-role="th">Average</th>
-<td id="T_64dbe_row0_col0" class="data row0 col0">30%</td>
-<td id="T_64dbe_row0_col1" class="data row0 col1">$13.23</td>
-<td id="T_64dbe_row0_col2" class="data row0 col2">22</td>
-<td id="T_64dbe_row0_col3" class="data row0 col3">$13.20</td>
+<th id="T_b7f3c_level0_row0" class="row_heading level0 row0" data-quarto-table-cell-role="th">Average</th>
+<td id="T_b7f3c_row0_col0" class="data row0 col0">30%</td>
+<td id="T_b7f3c_row0_col1" class="data row0 col1">$13.23</td>
+<td id="T_b7f3c_row0_col2" class="data row0 col2">22</td>
+<td id="T_b7f3c_row0_col3" class="data row0 col3">$13.20</td>
 </tr>
 <tr class="even">
-<th id="T_64dbe_level0_row1" class="row_heading level0 row1" data-quarto-table-cell-role="th">Low Inc</th>
-<td id="T_64dbe_row1_col0" class="data row1 col0">49%</td>
-<td id="T_64dbe_row1_col1" class="data row1 col1">$5.38</td>
-<td id="T_64dbe_row1_col2" class="data row1 col2">9</td>
-<td id="T_64dbe_row1_col3" class="data row1 col3">$5.40</td>
+<th id="T_b7f3c_level0_row1" class="row_heading level0 row1" data-quarto-table-cell-role="th">Low Inc</th>
+<td id="T_b7f3c_row1_col0" class="data row1 col0">49%</td>
+<td id="T_b7f3c_row1_col1" class="data row1 col1">$5.38</td>
+<td id="T_b7f3c_row1_col2" class="data row1 col2">9</td>
+<td id="T_b7f3c_row1_col3" class="data row1 col3">$5.40</td>
 </tr>
 <tr class="odd">
-<th id="T_64dbe_level0_row2" class="row_heading level0 row2" data-quarto-table-cell-role="th">High Inc</th>
-<td id="T_64dbe_row2_col0" class="data row2 col0">27%</td>
-<td id="T_64dbe_row2_col1" class="data row2 col1">$14.73</td>
-<td id="T_64dbe_row2_col2" class="data row2 col2">25</td>
-<td id="T_64dbe_row2_col3" class="data row2 col3">$15.00</td>
+<th id="T_b7f3c_level0_row2" class="row_heading level0 row2" data-quarto-table-cell-role="th">High Inc</th>
+<td id="T_b7f3c_row2_col0" class="data row2 col0">27%</td>
+<td id="T_b7f3c_row2_col1" class="data row2 col1">$14.73</td>
+<td id="T_b7f3c_row2_col2" class="data row2 col2">25</td>
+<td id="T_b7f3c_row2_col3" class="data row2 col3">$15.00</td>
 </tr>
 </tbody>
 </table>
@@ -2376,7 +2384,7 @@ Tip
 <li><strong>Medium Trucks</strong>: Box trucks, small semi-trailers, regional delivery vehicles</li>
 <li><strong>Heavy Trucks</strong>: Large semi-trailers, long-haul freight, bulk cargo carriers</li>
 </ul>
-<div id="24464edb" class="cell" data-execution_count="17">
+<div id="6cd2eabd" class="cell" data-execution_count="17">
 <details class="code-fold">
 <summary>Show the code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Calculate Truck VOT (using Average income as base)</span></span>
@@ -2402,37 +2410,37 @@ Tip
 <style type="text/css">
 </style>
 
-<table id="T_0391e" class="caption-top table table-sm table-striped small">
+<table id="T_7beb4" class="caption-top table table-sm table-striped small">
 <thead>
 <tr class="header">
 <th class="blank level0" data-quarto-table-cell-role="th">&nbsp;</th>
-<th id="T_0391e_level0_col0" class="col_heading level0 col0" data-quarto-table-cell-role="th">% of Income</th>
-<th id="T_0391e_level0_col1" class="col_heading level0 col1" data-quarto-table-cell-role="th">Unrounded ($/hr)</th>
-<th id="T_0391e_level0_col2" class="col_heading level0 col2" data-quarto-table-cell-role="th">VOT (¢/min)</th>
-<th id="T_0391e_level0_col3" class="col_heading level0 col3" data-quarto-table-cell-role="th">Equivalent ($/hr)</th>
+<th id="T_7beb4_level0_col0" class="col_heading level0 col0" data-quarto-table-cell-role="th">% of Income</th>
+<th id="T_7beb4_level0_col1" class="col_heading level0 col1" data-quarto-table-cell-role="th">Unrounded ($/hr)</th>
+<th id="T_7beb4_level0_col2" class="col_heading level0 col2" data-quarto-table-cell-role="th">VOT (¢/min)</th>
+<th id="T_7beb4_level0_col3" class="col_heading level0 col3" data-quarto-table-cell-role="th">Equivalent ($/hr)</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<th id="T_0391e_level0_row0" class="row_heading level0 row0" data-quarto-table-cell-role="th">Light</th>
-<td id="T_0391e_row0_col0" class="data row0 col0">65%</td>
-<td id="T_0391e_row0_col1" class="data row0 col1">$28.67</td>
-<td id="T_0391e_row0_col2" class="data row0 col2">48</td>
-<td id="T_0391e_row0_col3" class="data row0 col3">$28.80</td>
+<th id="T_7beb4_level0_row0" class="row_heading level0 row0" data-quarto-table-cell-role="th">Light</th>
+<td id="T_7beb4_row0_col0" class="data row0 col0">65%</td>
+<td id="T_7beb4_row0_col1" class="data row0 col1">$28.67</td>
+<td id="T_7beb4_row0_col2" class="data row0 col2">48</td>
+<td id="T_7beb4_row0_col3" class="data row0 col3">$28.80</td>
 </tr>
 <tr class="even">
-<th id="T_0391e_level0_row1" class="row_heading level0 row1" data-quarto-table-cell-role="th">Medium</th>
-<td id="T_0391e_row1_col0" class="data row1 col0">87%</td>
-<td id="T_0391e_row1_col1" class="data row1 col1">$38.38</td>
-<td id="T_0391e_row1_col2" class="data row1 col2">64</td>
-<td id="T_0391e_row1_col3" class="data row1 col3">$38.40</td>
+<th id="T_7beb4_level0_row1" class="row_heading level0 row1" data-quarto-table-cell-role="th">Medium</th>
+<td id="T_7beb4_row1_col0" class="data row1 col0">87%</td>
+<td id="T_7beb4_row1_col1" class="data row1 col1">$38.38</td>
+<td id="T_7beb4_row1_col2" class="data row1 col2">64</td>
+<td id="T_7beb4_row1_col3" class="data row1 col3">$38.40</td>
 </tr>
 <tr class="odd">
-<th id="T_0391e_level0_row2" class="row_heading level0 row2" data-quarto-table-cell-role="th">Heavy</th>
-<td id="T_0391e_row2_col0" class="data row2 col0">110%</td>
-<td id="T_0391e_row2_col1" class="data row2 col1">$48.52</td>
-<td id="T_0391e_row2_col2" class="data row2 col2">81</td>
-<td id="T_0391e_row2_col3" class="data row2 col3">$48.60</td>
+<th id="T_7beb4_level0_row2" class="row_heading level0 row2" data-quarto-table-cell-role="th">Heavy</th>
+<td id="T_7beb4_row2_col0" class="data row2 col0">110%</td>
+<td id="T_7beb4_row2_col1" class="data row2 col1">$48.52</td>
+<td id="T_7beb4_row2_col2" class="data row2 col2">81</td>
+<td id="T_7beb4_row2_col3" class="data row2 col3">$48.60</td>
 </tr>
 </tbody>
 </table>
@@ -2458,7 +2466,7 @@ Tip
 <li><strong>VOT_Auto_Wrk_Hi, VOT_Auto_Per_Hi</strong>: High-income work and personal trip VOT</li>
 </ul>
 <p>The table displays values in both cents per minute (for model input) and dollars per hour (for intuitive interpretation).</p>
-<div id="4ffc6aa0" class="cell" data-execution_count="18">
+<div id="7c722e1a" class="cell" data-execution_count="18">
 <details class="code-fold">
 <summary>Show the code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Build the final VOT parameters table</span></span>
@@ -2494,75 +2502,75 @@ Tip
 <style type="text/css">
 </style>
 
-<table id="T_424c0" class="caption-top table table-sm table-striped small">
+<table id="T_90d44" class="caption-top table table-sm table-striped small">
 <thead>
 <tr class="header">
 <th class="blank level0" data-quarto-table-cell-role="th">&nbsp;</th>
-<th id="T_424c0_level0_col0" class="col_heading level0 col0" data-quarto-table-cell-role="th">Parameter</th>
-<th id="T_424c0_level0_col1" class="col_heading level0 col1" data-quarto-table-cell-role="th">VOT (cent/min)</th>
-<th id="T_424c0_level0_col2" class="col_heading level0 col2" data-quarto-table-cell-role="th">VOT ($/hr)</th>
+<th id="T_90d44_level0_col0" class="col_heading level0 col0" data-quarto-table-cell-role="th">Parameter</th>
+<th id="T_90d44_level0_col1" class="col_heading level0 col1" data-quarto-table-cell-role="th">VOT (cent/min)</th>
+<th id="T_90d44_level0_col2" class="col_heading level0 col2" data-quarto-table-cell-role="th">VOT ($/hr)</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<th id="T_424c0_level0_row0" class="row_heading level0 row0" data-quarto-table-cell-role="th">0</th>
-<td id="T_424c0_row0_col0" class="data row0 col0">VOT_Auto_Wrk</td>
-<td id="T_424c0_row0_col1" class="data row0 col1">29¢</td>
-<td id="T_424c0_row0_col2" class="data row0 col2">$17.4</td>
+<th id="T_90d44_level0_row0" class="row_heading level0 row0" data-quarto-table-cell-role="th">0</th>
+<td id="T_90d44_row0_col0" class="data row0 col0">VOT_Auto_Wrk</td>
+<td id="T_90d44_row0_col1" class="data row0 col1">29¢</td>
+<td id="T_90d44_row0_col2" class="data row0 col2">$17.4</td>
 </tr>
 <tr class="even">
-<th id="T_424c0_level0_row1" class="row_heading level0 row1" data-quarto-table-cell-role="th">1</th>
-<td id="T_424c0_row1_col0" class="data row1 col0">VOT_Auto_Per</td>
-<td id="T_424c0_row1_col1" class="data row1 col1">22¢</td>
-<td id="T_424c0_row1_col2" class="data row1 col2">$13.2</td>
+<th id="T_90d44_level0_row1" class="row_heading level0 row1" data-quarto-table-cell-role="th">1</th>
+<td id="T_90d44_row1_col0" class="data row1 col0">VOT_Auto_Per</td>
+<td id="T_90d44_row1_col1" class="data row1 col1">22¢</td>
+<td id="T_90d44_row1_col2" class="data row1 col2">$13.2</td>
 </tr>
 <tr class="odd">
-<th id="T_424c0_level0_row2" class="row_heading level0 row2" data-quarto-table-cell-role="th">2</th>
-<td id="T_424c0_row2_col0" class="data row2 col0">VOT_Auto_Ext</td>
-<td id="T_424c0_row2_col1" class="data row2 col1">26¢</td>
-<td id="T_424c0_row2_col2" class="data row2 col2">$15.3</td>
+<th id="T_90d44_level0_row2" class="row_heading level0 row2" data-quarto-table-cell-role="th">2</th>
+<td id="T_90d44_row2_col0" class="data row2 col0">VOT_Auto_Ext</td>
+<td id="T_90d44_row2_col1" class="data row2 col1">26¢</td>
+<td id="T_90d44_row2_col2" class="data row2 col2">$15.3</td>
 </tr>
 <tr class="even">
-<th id="T_424c0_level0_row3" class="row_heading level0 row3" data-quarto-table-cell-role="th">3</th>
-<td id="T_424c0_row3_col0" class="data row3 col0">VOT_LT</td>
-<td id="T_424c0_row3_col1" class="data row3 col1">48¢</td>
-<td id="T_424c0_row3_col2" class="data row3 col2">$28.8</td>
+<th id="T_90d44_level0_row3" class="row_heading level0 row3" data-quarto-table-cell-role="th">3</th>
+<td id="T_90d44_row3_col0" class="data row3 col0">VOT_LT</td>
+<td id="T_90d44_row3_col1" class="data row3 col1">48¢</td>
+<td id="T_90d44_row3_col2" class="data row3 col2">$28.8</td>
 </tr>
 <tr class="odd">
-<th id="T_424c0_level0_row4" class="row_heading level0 row4" data-quarto-table-cell-role="th">4</th>
-<td id="T_424c0_row4_col0" class="data row4 col0">VOT_MD</td>
-<td id="T_424c0_row4_col1" class="data row4 col1">64¢</td>
-<td id="T_424c0_row4_col2" class="data row4 col2">$38.4</td>
+<th id="T_90d44_level0_row4" class="row_heading level0 row4" data-quarto-table-cell-role="th">4</th>
+<td id="T_90d44_row4_col0" class="data row4 col0">VOT_MD</td>
+<td id="T_90d44_row4_col1" class="data row4 col1">64¢</td>
+<td id="T_90d44_row4_col2" class="data row4 col2">$38.4</td>
 </tr>
 <tr class="even">
-<th id="T_424c0_level0_row5" class="row_heading level0 row5" data-quarto-table-cell-role="th">5</th>
-<td id="T_424c0_row5_col0" class="data row5 col0">VOT_HV</td>
-<td id="T_424c0_row5_col1" class="data row5 col1">81¢</td>
-<td id="T_424c0_row5_col2" class="data row5 col2">$48.6</td>
+<th id="T_90d44_level0_row5" class="row_heading level0 row5" data-quarto-table-cell-role="th">5</th>
+<td id="T_90d44_row5_col0" class="data row5 col0">VOT_HV</td>
+<td id="T_90d44_row5_col1" class="data row5 col1">81¢</td>
+<td id="T_90d44_row5_col2" class="data row5 col2">$48.6</td>
 </tr>
 <tr class="odd">
-<th id="T_424c0_level0_row6" class="row_heading level0 row6" data-quarto-table-cell-role="th">6</th>
-<td id="T_424c0_row6_col0" class="data row6 col0">VOT_Auto_Wrk_Lo</td>
-<td id="T_424c0_row6_col1" class="data row6 col1">11¢</td>
-<td id="T_424c0_row6_col2" class="data row6 col2">$6.6</td>
+<th id="T_90d44_level0_row6" class="row_heading level0 row6" data-quarto-table-cell-role="th">6</th>
+<td id="T_90d44_row6_col0" class="data row6 col0">VOT_Auto_Wrk_Lo</td>
+<td id="T_90d44_row6_col1" class="data row6 col1">11¢</td>
+<td id="T_90d44_row6_col2" class="data row6 col2">$6.6</td>
 </tr>
 <tr class="even">
-<th id="T_424c0_level0_row7" class="row_heading level0 row7" data-quarto-table-cell-role="th">7</th>
-<td id="T_424c0_row7_col0" class="data row7 col0">VOT_Auto_Per_Lo</td>
-<td id="T_424c0_row7_col1" class="data row7 col1">9¢</td>
-<td id="T_424c0_row7_col2" class="data row7 col2">$5.4</td>
+<th id="T_90d44_level0_row7" class="row_heading level0 row7" data-quarto-table-cell-role="th">7</th>
+<td id="T_90d44_row7_col0" class="data row7 col0">VOT_Auto_Per_Lo</td>
+<td id="T_90d44_row7_col1" class="data row7 col1">9¢</td>
+<td id="T_90d44_row7_col2" class="data row7 col2">$5.4</td>
 </tr>
 <tr class="odd">
-<th id="T_424c0_level0_row8" class="row_heading level0 row8" data-quarto-table-cell-role="th">8</th>
-<td id="T_424c0_row8_col0" class="data row8 col0">VOT_Auto_Wrk_Hi</td>
-<td id="T_424c0_row8_col1" class="data row8 col1">31¢</td>
-<td id="T_424c0_row8_col2" class="data row8 col2">$18.6</td>
+<th id="T_90d44_level0_row8" class="row_heading level0 row8" data-quarto-table-cell-role="th">8</th>
+<td id="T_90d44_row8_col0" class="data row8 col0">VOT_Auto_Wrk_Hi</td>
+<td id="T_90d44_row8_col1" class="data row8 col1">31¢</td>
+<td id="T_90d44_row8_col2" class="data row8 col2">$18.6</td>
 </tr>
 <tr class="even">
-<th id="T_424c0_level0_row9" class="row_heading level0 row9" data-quarto-table-cell-role="th">9</th>
-<td id="T_424c0_row9_col0" class="data row9 col0">VOT_Auto_Per_Hi</td>
-<td id="T_424c0_row9_col1" class="data row9 col1">25¢</td>
-<td id="T_424c0_row9_col2" class="data row9 col2">$15.0</td>
+<th id="T_90d44_level0_row9" class="row_heading level0 row9" data-quarto-table-cell-role="th">9</th>
+<td id="T_90d44_row9_col0" class="data row9 col0">VOT_Auto_Per_Hi</td>
+<td id="T_90d44_row9_col1" class="data row9 col1">25¢</td>
+<td id="T_90d44_row9_col2" class="data row9 col2">$15.0</td>
 </tr>
 </tbody>
 </table>
@@ -2572,7 +2580,7 @@ Tip
 <section id="export-to-csv" class="level3">
 <h3 class="anchored" data-anchor-id="export-to-csv">Export to CSV</h3>
 <p>We export the final VOT parameters to a CSV file for easy integration into the travel demand model configuration. This file becomes the authoritative source for VOT parameters, documenting the values used in model runs and providing traceability back to the source data and methodology.</p>
-<div id="08388e54" class="cell" data-execution_count="19">
+<div id="0957da33" class="cell" data-execution_count="19">
 <details class="code-fold">
 <summary>Show the code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Create output directory if it doesn't exist</span></span>
@@ -3520,11 +3528,11 @@ Tip
 <span id="cb23-469"><a href="#cb23-469" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb23-470"><a href="#cb23-470" aria-hidden="true" tabindex="-1"></a><span class="co"># Apply correction and inflation factors</span></span>
 <span id="cb23-471"><a href="#cb23-471" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> cat_name <span class="kw">in</span> summary_data:</span>
-<span id="cb23-472"><a href="#cb23-472" aria-hidden="true" tabindex="-1"></a>    <span class="co"># summary_data[cat_name]['Correction Factor'] = correction_factor</span></span>
+<span id="cb23-472"><a href="#cb23-472" aria-hidden="true" tabindex="-1"></a>    summary_data[cat_name][<span class="st">'Correction Factor'</span>] <span class="op">=</span> correction_factor</span>
 <span id="cb23-473"><a href="#cb23-473" aria-hidden="true" tabindex="-1"></a>    summary_data[cat_name][<span class="st">'Adj Med Income'</span>] <span class="op">=</span> (</span>
 <span id="cb23-474"><a href="#cb23-474" aria-hidden="true" tabindex="-1"></a>        summary_data[cat_name][<span class="st">'Unadj Med Inc'</span>] <span class="op">*</span> correction_factor</span>
 <span id="cb23-475"><a href="#cb23-475" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb23-476"><a href="#cb23-476" aria-hidden="true" tabindex="-1"></a>    <span class="co"># summary_data[cat_name]['Inflation Adj Factor'] = inflation_factor</span></span>
+<span id="cb23-476"><a href="#cb23-476" aria-hidden="true" tabindex="-1"></a>    summary_data[cat_name][<span class="st">'Inflation Adj Factor'</span>] <span class="op">=</span> inflation_factor</span>
 <span id="cb23-477"><a href="#cb23-477" aria-hidden="true" tabindex="-1"></a>    summary_data[cat_name][<span class="st">'Median Income'</span>] <span class="op">=</span> (</span>
 <span id="cb23-478"><a href="#cb23-478" aria-hidden="true" tabindex="-1"></a>        summary_data[cat_name][<span class="st">'Adj Med Income'</span>] <span class="op">*</span> inflation_factor</span>
 <span id="cb23-479"><a href="#cb23-479" aria-hidden="true" tabindex="-1"></a>    )</span>
@@ -3537,9 +3545,9 @@ Tip
 <span id="cb23-486"><a href="#cb23-486" aria-hidden="true" tabindex="-1"></a>    <span class="st">'Sum HH'</span>: <span class="st">'</span><span class="sc">{:,.0f}</span><span class="st">'</span>,</span>
 <span id="cb23-487"><a href="#cb23-487" aria-hidden="true" tabindex="-1"></a>    <span class="st">'Sum HH * Inc'</span>: <span class="st">'</span><span class="sc">{:,.0f}</span><span class="st">'</span>,</span>
 <span id="cb23-488"><a href="#cb23-488" aria-hidden="true" tabindex="-1"></a>    <span class="st">'Unadj Med Inc'</span>: <span class="st">'$</span><span class="sc">{:,.0f}</span><span class="st">'</span>,</span>
-<span id="cb23-489"><a href="#cb23-489" aria-hidden="true" tabindex="-1"></a>    <span class="co"># 'Correction Factor': '{:.4f}',</span></span>
+<span id="cb23-489"><a href="#cb23-489" aria-hidden="true" tabindex="-1"></a>    <span class="st">'Correction Factor'</span>: <span class="st">'</span><span class="sc">{:.4f}</span><span class="st">'</span>,</span>
 <span id="cb23-490"><a href="#cb23-490" aria-hidden="true" tabindex="-1"></a>    <span class="st">'Adj Med Income'</span>: <span class="st">'$</span><span class="sc">{:,.0f}</span><span class="st">'</span>,</span>
-<span id="cb23-491"><a href="#cb23-491" aria-hidden="true" tabindex="-1"></a>    <span class="co"># 'Inflation Adj Factor': '{:.4f}',</span></span>
+<span id="cb23-491"><a href="#cb23-491" aria-hidden="true" tabindex="-1"></a>    <span class="st">'Inflation Adj Factor'</span>: <span class="st">'</span><span class="sc">{:.4f}</span><span class="st">'</span>,</span>
 <span id="cb23-492"><a href="#cb23-492" aria-hidden="true" tabindex="-1"></a>    <span class="st">'Median Income'</span>: <span class="st">'$</span><span class="sc">{:,.0f}</span><span class="st">'</span></span>
 <span id="cb23-493"><a href="#cb23-493" aria-hidden="true" tabindex="-1"></a>}</span>
 <span id="cb23-494"><a href="#cb23-494" aria-hidden="true" tabindex="-1"></a></span>
