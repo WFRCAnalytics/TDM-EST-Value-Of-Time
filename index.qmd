@@ -1,7 +1,7 @@
 ---
 title: Value of Time Estimation
-subtitle: Estimating the Value of Time Parameter for Utah's Travel Demand Model
-description: This notebook replicates the analysis from the '_archive/_Source - Med Income & Value of Time - 2022-08-09.xlsb' using the Utah Household Data. The values of time are segmented by occupancy and purpose (work vs. personal).
+subtitle: Estimating the Value of Time (VOT) Parameter for Utah's Travel Demand Model
+description: This notebook replicates the analysis from the '_archive/_Source - Med Income & Value of Time - 2022-08-09.xlsb' using the Utah Household and Hosehold Income data from 2019-2023 American Community Survey 5-Year Estimates. The VOTs are segmented by occupancy and purpose (work vs. personal).
 author:
  - name: Pukar Bhandari
    email: pukar.bhandari@wfrc.utah.gov
@@ -440,93 +440,96 @@ df_median_income
 #### Calculate Hourly Income
 
 ```{python}
-# Extract median incomes and calculate hourly rates
-median_income = df_summary.loc[['Average', 'Low Inc', 'High Inc'], 'Median Income']
-median_income_hr = median_income / 2080
+# Convert annual median income to hourly rate (assuming 2080 work hours/year)
+df_hourly = pd.DataFrame({
+    'Median Income': df_summary['Median Income'],
+    'Hourly Rate': df_summary['Median Income'] / 2080
+}, index=['Average', 'Low Inc', 'High Inc'])
 
-print("=" * 80)
-print("HOURLY INCOME & ESTIMATED WAGE RATE")
-print("=" * 80)
-df_hourly_display = pd.DataFrame({
-    cat: [f"${median_income[cat]:,.0f}", f"${median_income_hr[cat]:.2f}"]
-    for cat in ['Average', 'Low Inc', 'High Inc']
-}, index=['Median Income', 'Median Income ($/hr)'])
-print(df_hourly_display.to_string())
+df_hourly.style.format({
+    'Median Income': '${:,.0f}',
+    'Hourly Rate': '${:.2f}'
+})
 ```
 
 #### Setup VOT Calculation Helper
 
 ```{python}
+# Define VOT as percentage of hourly income for each trip purpose and income group
 # Hardcoded VOT percentages from previous calculations
-vot_percentages = pd.DataFrame({
+vot_pct = pd.DataFrame({
     'Work': [0.39, 0.62, 0.34],
     'Personal': [0.30, 0.49, 0.27]
 }, index=['Average', 'Low Inc', 'High Inc'])
+```
 
-# Helper function to calculate VOT metrics
-def calculate_vot(hourly_rate, percentage):
-    """Calculate VOT metrics: unrounded rate, VOT cents/min, equivalent rate"""
-    unrounded_hr = hourly_rate * percentage
-    vot_cents = round(unrounded_hr * 100 / 60, 0)
-    equiv_hr = vot_cents * 60 / 100
-    return unrounded_hr, vot_cents, equiv_hr
+```{python}
+# Calculate VOT in cents per minute (hourly rate * percentage * 100 / 60)
+vot_cents_min = ((df_hourly['Hourly Rate'].values[:, None] * vot_pct) * 100 / 60).round(0)
+
+vot_cents_min.style.format({
+    'Work': '${:.1f}',
+    'Personal': '${:.1f}'
+})
 ```
 
 #### Calculate and Display Work & Personal VOT
 
 ```{python}
-# Calculate all VOT metrics
-vot_results = {}
-for trip_type in ['Work', 'Personal']:
-    vot_results[trip_type] = {}
-    for income_cat in ['Average', 'Low Inc', 'High Inc']:
-        pct = vot_percentages.loc[income_cat, trip_type]
-        vot_results[trip_type][income_cat] = calculate_vot(median_income_hr[income_cat], pct)
+# Display Work VOT results
+df_vot_work = pd.DataFrame({
+    '% of Income': vot_pct['Work'],
+    'Unrounded ($/hr)': df_hourly['Hourly Rate'] * vot_pct['Work'],
+    'VOT (¢/min)': vot_cents_min['Work'],
+    'Equivalent ($/hr)': vot_cents_min['Work'] * 60 / 100
+}, index=['Average', 'Low Inc', 'High Inc'])
 
-# Display Work & Personal VOT
-print("\n" + "=" * 80)
-print("WORK & PERSONAL VALUE OF TIME")
-print("=" * 80)
-rows = []
-for trip_type in ['Work', 'Personal']:
-    rows.extend([
-        {'Metric': f'% of Med Income - {trip_type}',
-         **{cat: f"{vot_percentages.loc[cat, trip_type]:.0%}" for cat in ['Average', 'Low Inc', 'High Inc']}},
-        {'Metric': f'Unrounded Hr Rate - {trip_type} ($/hr)',
-         **{cat: f"${vot_results[trip_type][cat][0]:.2f}" for cat in ['Average', 'Low Inc', 'High Inc']}},
-        {'Metric': f'Value of Time - {trip_type} (cent/min)',
-         **{cat: f"{vot_results[trip_type][cat][1]:.0f}" for cat in ['Average', 'Low Inc', 'High Inc']}},
-        {'Metric': f'Equiv Hr Rate - {trip_type} ($/hr)',
-         **{cat: f"${vot_results[trip_type][cat][2]:.2f}" for cat in ['Average', 'Low Inc', 'High Inc']}}
-    ])
-    if trip_type == 'Work':
-        rows.append({'Metric': '', 'Average': '', 'Low Inc': '', 'High Inc': ''})
+df_vot_work.style.format({
+    '% of Income': '{:.0%}',
+    'Unrounded ($/hr)': '${:.2f}',
+    'VOT (¢/min)': '{:.0f}',
+    'Equivalent ($/hr)': '${:.2f}'
+})
+```
 
-print(pd.DataFrame(rows).to_string(index=False))
+```{python}
+# Display Personal VOT results
+df_vot_personal = pd.DataFrame({
+    '% of Income': vot_pct['Personal'],
+    'Unrounded ($/hr)': df_hourly['Hourly Rate'] * vot_pct['Personal'],
+    'VOT (¢/min)': vot_cents_min['Personal'],
+    'Equivalent ($/hr)': vot_cents_min['Personal'] * 60 / 100
+}, index=['Average', 'Low Inc', 'High Inc'])
+
+df_vot_personal.style.format({
+    '% of Income': '{:.0%}',
+    'Unrounded ($/hr)': '${:.2f}',
+    'VOT (¢/min)': '{:.0f}',
+    'Equivalent ($/hr)': '${:.2f}'
+})
 ```
 
 #### Calculate and Display Truck VOT
 
 ```{python}
-# Calculate Truck VOT
-print("\n" + "=" * 80)
-print("TRUCK VALUE OF TIME")
-print("=" * 80)
+# Calculate Truck VOT (using Average income as base)
+# Hard coded percentages for truck types
+truck_pct = pd.Series([0.65, 0.87, 1.10], index=['Light', 'Medium', 'Heavy'])
 
-truck_config = [('Light', 0.65), ('Medium', 0.87), ('Heavy', 1.10)]
-truck_rows = []
+df_vot_trucks = pd.DataFrame({
+    '% of Income': truck_pct,
+    'Unrounded ($/hr)': df_hourly.loc['Average', 'Hourly Rate'] * truck_pct,
+    'VOT (¢/min)': ((df_hourly.loc['Average', 'Hourly Rate'] * truck_pct) * 100 / 60).round(0)
+})
 
-for truck_type, pct in truck_config:
-    unrounded, vot, equiv = calculate_vot(median_income_hr['Average'], pct)
-    truck_rows.append({
-        'Type': truck_type,
-        '% of Inc': f"{pct:.0%}",
-        'Hr Rate ($/hr)': f"${unrounded:.2f}",
-        'VOT (cent/min)': f"{vot:.0f}",
-        'Equiv Hr Rate ($/hr)': f"${equiv:.2f}"
-    })
+df_vot_trucks['Equivalent ($/hr)'] = df_vot_trucks['VOT (¢/min)'] * 60 / 100
 
-print(pd.DataFrame(truck_rows).to_string(index=False))
+df_vot_trucks.style.format({
+    '% of Income': '{:.0%}',
+    'Unrounded ($/hr)': '${:.2f}',
+    'VOT (¢/min)': '{:.0f}',
+    'Equivalent ($/hr)': '${:.2f}'
+})
 ```
 
 ## Export Results
@@ -534,72 +537,34 @@ print(pd.DataFrame(truck_rows).to_string(index=False))
 ### Create Final VOT Table
 
 ```{python}
-# Extract VOT summary table
-vot_summary = []
+# Build the final VOT parameters table
+df_vot_params = pd.DataFrame({
+    'Parameter': [
+        'VOT_Auto_Wrk', 'VOT_Auto_Per', 'VOT_Auto_Ext',
+        'VOT_LT', 'VOT_MD', 'VOT_HV',
+        'VOT_Auto_Wrk_Lo', 'VOT_Auto_Per_Lo',
+        'VOT_Auto_Wrk_Hi', 'VOT_Auto_Per_Hi'
+    ],
+    'VOT (cent/min)': [
+        vot_cents_min.loc['Average', 'Work'],
+        vot_cents_min.loc['Average', 'Personal'],
+        (vot_cents_min.loc['Average', 'Work'] + vot_cents_min.loc['Average', 'Personal']) / 2,
+        df_vot_trucks.loc['Light', 'VOT (¢/min)'],
+        df_vot_trucks.loc['Medium', 'VOT (¢/min)'],
+        df_vot_trucks.loc['Heavy', 'VOT (¢/min)'],
+        vot_cents_min.loc['Low Inc', 'Work'],
+        vot_cents_min.loc['Low Inc', 'Personal'],
+        vot_cents_min.loc['High Inc', 'Work'],
+        vot_cents_min.loc['High Inc', 'Personal']
+    ]
+})
 
-# Auto Work and Personal - Average
-vot_summary.extend([
-    {
-        'Parameter': 'VOT_Auto_Wrk',
-        'VOT (cent/min)': vot_results['Work']['Average'][1],
-        'VOT ($/hr)': f"${vot_results['Work']['Average'][2]:.1f}"
-    },
-    {
-        'Parameter': 'VOT_Auto_Per',
-        'VOT (cent/min)': vot_results['Personal']['Average'][1],
-        'VOT ($/hr)': f"${vot_results['Personal']['Average'][2]:.1f}"
-    },
-    {
-        'Parameter': 'VOT_Auto_Ext',
-        'VOT (cent/min)': round((vot_results['Work']['Average'][1] + vot_results['Personal']['Average'][1]) / 2),
-        'VOT ($/hr)': f"${(vot_results['Work']['Average'][2] + vot_results['Personal']['Average'][2]) / 2:.1f}"
-    }
-])
+df_vot_params['VOT ($/hr)'] = df_vot_params['VOT (cent/min)'] * 60 / 100
 
-# Truck VOT
-for truck_type, pct in [('LT', 0.65), ('MD', 0.87), ('HV', 1.10)]:
-    _, vot, equiv = calculate_vot(median_income_hr['Average'], pct)
-    vot_summary.append({
-        'Parameter': f'VOT_{truck_type}',
-        'VOT (cent/min)': vot,
-        'VOT ($/hr)': f"${equiv:.1f}"
-    })
-
-# Auto Work and Personal - Low Income
-vot_summary.extend([
-    {
-        'Parameter': 'VOT_Auto_Wrk_Lo',
-        'VOT (cent/min)': vot_results['Work']['Low Inc'][1],
-        'VOT ($/hr)': f"${vot_results['Work']['Low Inc'][2]:.1f}"
-    },
-    {
-        'Parameter': 'VOT_Auto_Per_Lo',
-        'VOT (cent/min)': vot_results['Personal']['Low Inc'][1],
-        'VOT ($/hr)': f"${vot_results['Personal']['Low Inc'][2]:.1f}"
-    }
-])
-
-# Auto Work and Personal - High Income
-vot_summary.extend([
-    {
-        'Parameter': 'VOT_Auto_Wrk_Hi',
-        'VOT (cent/min)': vot_results['Work']['High Inc'][1],
-        'VOT ($/hr)': f"${vot_results['Work']['High Inc'][2]:.1f}"
-    },
-    {
-        'Parameter': 'VOT_Auto_Per_Hi',
-        'VOT (cent/min)': vot_results['Personal']['High Inc'][1],
-        'VOT ($/hr)': f"${vot_results['Personal']['High Inc'][2]:.1f}"
-    }
-])
-
-# Create and display final VOT table
-df_vot_final = pd.DataFrame(vot_summary)
-
-print("=" * 60)
-print("VALUE OF TIME PARAMETERS")
-print("=" * 60)
-print(df_vot_final.to_string(index=False))
+df_vot_params.style.format({
+    'VOT (cent/min)': '{:.0f}¢',
+    'VOT ($/hr)': '${:.1f}'
+})
 ```
 
 ### Export to CSV
@@ -610,7 +575,7 @@ output_dir = Path("_output")
 output_dir.mkdir(parents=True, exist_ok=True)
 
 # Export to CSV
-df_vot_final.to_csv(
+df_vot_params.to_csv(
     output_dir / "value_of_time.csv",
     index=False
 )
