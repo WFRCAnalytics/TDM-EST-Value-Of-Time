@@ -338,7 +338,7 @@ sns.set_style("whitegrid")
 sns.set_context("notebook")
 
 # Create barplot using seaborn
-plt.figure(figsize=(12, 6))
+# plt.figure(figsize=(12, 6))
 sns.barplot(
     data=df_plot,
     x='index',
