@@ -205,14 +205,14 @@ The CPI-U-RS (Consumer Price Index for All Urban Consumers - Research Series) pr
 Data Source: Consumer Price Index for All Urban Consumers (CPI-U) \[Source: [Bureau of Labor Statistics](https://www.bls.gov/cpi/research-series/r-cpi-u-rs-home.htm)\]
 
 ```{python}
-# Usage
+# Set file path and URL for CPI data
 filepath_cpi = Path("_data/bls/r-cpi-u-rs-allitems.xlsx")
 url_cpi = "https://www.bls.gov/cpi/research-series/r-cpi-u-rs-allitems.xlsx"
 
-# Download if needed
+# Ensure the file exists, Download if not
 fetch_excel(path=filepath_cpi, url=url_cpi)
 
-# Read separately
+# Read Excel file
 df_CPI = pd.read_excel(
     filepath_cpi,
     sheet_name="All items",
