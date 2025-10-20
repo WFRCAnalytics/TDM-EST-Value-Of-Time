@@ -526,7 +526,9 @@ These hardcoded percentages represent the fraction of hourly wage that travelers
 
 **Income Effects**: Lower-income travelers often show higher VOT as a percentage of income for work trips (they can't afford to be late) but lower for personal trips (more time-flexible). Higher-income travelers show the opposite pattern.
 
+:::{.callout-important}
 These percentages have been calibrated in previous model validation efforts to match observed behavior patterns in the region.
+:::
 
 ```{python}
 # Define VOT as percentage of hourly income for each trip purpose and income group
@@ -610,11 +612,16 @@ The percentages (relative to average household income) are calibrated to match o
 - **Medium Trucks**: Box trucks, small semi-trailers, regional delivery vehicles
 - **Heavy Trucks**: Large semi-trailers, long-haul freight, bulk cargo carriers
 
+:::{.callout-important}
+These percentages have been calibrated in previous model validation efforts to match observed behavior patterns in the region.
+:::
+
 ```{python}
 # Calculate Truck VOT (using Average income as base)
-# Hard coded percentages for truck types
 truck_pct = pd.Series([0.65, 0.87, 1.10], index=['Light', 'Medium', 'Heavy'])
+```
 
+```{python}
 df_vot_trucks = pd.DataFrame({
     '% of Income': truck_pct,
     'Unrounded ($/hr)': df_hourly.loc['Average', 'Hourly Rate'] * truck_pct,
