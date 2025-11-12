@@ -9,38 +9,6 @@ author:
      - name: Wasatch Front Regional Council
        url: "https://wfrc.utah.gov/"
 date: "2025-10-14"
-
-execute:
-   eval: true
-jupyter: python3
-
-format:
-  html:
-    theme:
-        light: flatly
-        dark: darkly
-    respect-user-color-scheme: true
-
-    fig-width: 8.4
-    fig-height: 5.44
-    fig-responsive: true
-
-    toc: true
-    number-sections: true
-    number-depth: 2
-    html-math-method: katex
-    code-link: true
-    code-tools: true
-    code-fold: true
-    code-summary: "Show the code"
-    # fig-width: 8
-    # fig-height: 5
-    # out-width: "100%"
-    # fig-align: center
-    resources:
-        - "_output/*.csv"
-
-title-block-banner: true
 ---
 
 ## Introduction

@@ -1,0 +1,11 @@
+Parameter,VOT (cent/min),VOT ($/hr)
+VOT_Auto_Wrk,29.0,17.4
+VOT_Auto_Per,22.0,13.2
+VOT_Auto_Ext,25.5,15.3
+VOT_LT,48.0,28.8
+VOT_MD,64.0,38.4
+VOT_HV,81.0,48.6
+VOT_Auto_Wrk_Lo,11.0,6.6
+VOT_Auto_Per_Lo,9.0,5.4
+VOT_Auto_Wrk_Hi,31.0,18.6
+VOT_Auto_Per_Hi,25.0,15.0
